@@ -1,0 +1,394 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/database/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SessionStatus {
+  OPEN
+  CLOSED
+}
+
+enum SplitMethod {
+  EQUAL
+  SINGLE_PAYER
+}
+
+enum OrderRoundStatus {
+  SUBMITTED
+  COMPLETED
+}
+
+enum OrderItemStatus {
+  PENDING
+  COOKING
+  SERVED
+}
+
+enum BillStatus {
+  OPEN
+  SETTLED
+  VOID
+}
+
+enum BillShareStatus {
+  UNPAID
+  PAID
+}
+
+enum PaymentMethodCode {
+  PROMPTPAY
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  NOTIFIED
+  CONFIRMED
+  FAILED
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model StoreSetting {
+  id                  String      @id @default(uuid())
+  enableVat           Boolean     @default(false) @map("enable_vat")
+  vatRate             Float       @default(0.07) @map("vat_rate")
+  enableServiceCharge Boolean     @default(false) @map("enable_service_charge")
+  serviceChargeRate   Float       @default(0.10) @map("service_charge_rate")
+  currency            String      @default("THB")
+  timezone            String      @default("Asia/Bangkok")
+  defaultSplitMethod  SplitMethod @default(SINGLE_PAYER) @map("default_split_method")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("store_setting")
+}
+
+model Role {
+  id         String      @id @default(uuid())
+  code       String      @unique
+  name       String
+  staffUsers StaffUser[]
+
+  @@map("role")
+}
+
+model StaffUser {
+  id           String    @id @default(uuid())
+  roleId       String    @map("role_id")
+  role         Role      @relation(fields: [roleId], references: [id])
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  createdMenuItems  MenuItem[] @relation("MenuItemCreatedBy")
+  issuedBills       Bill[]     @relation("BillIssuedBy")
+  confirmedPayments Payment[]  @relation("PaymentConfirmedBy")
+  markedPayments    Payment[]  @relation("PaymentMarkedBy")
+
+  @@map("staff_user")
+}
+
+model DiningTable {
+  id            String   @id @default(uuid())
+  tableNumber   String   @map("table_number")
+  qrToken       String   @unique @map("qr_token")
+  qrGeneratedAt DateTime @default(now()) @map("qr_generated_at")
+  isActive      Boolean  @default(true) @map("is_active")
+
+  tableSessions TableSession[]
+
+  @@map("dinning_table")
+}
+
+model MenuCategory {
+  id        String  @id @default(uuid())
+  name      String
+  sortOrder Int     @map("sort_order")
+  isActive  Boolean @default(true) @map("is_active")
+
+  menuItems MenuItem[]
+
+  @@map("menu_category")
+}
+
+model MenuItem {
+  id                      String       @id @default(uuid())
+  categoryId              String       @map("category_id")
+  category                MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdBy               String?      @map("created_by")
+  creator                 StaffUser?   @relation("MenuItemCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  name                    String
+  description             String
+  price                   Int
+  imageUrl                String       @map("image_url")
+  estimatedCookingMinutes Int          @map("estimated_cooking_minutes")
+  isAvailable             Boolean      @default(true) @map("is_available")
+  createdAt               DateTime     @default(now()) @map("created_at")
+  updatedAt               DateTime     @updatedAt @map("updated_at")
+  deletedAt               DateTime?    @map("deleted_at")
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@map("menu_item")
+}
+
+// model ModifierGroup {
+//   id         String  @id @default(uuid())
+//   name       String
+//   isRequired Boolean @map("is_required")
+//   maxSelect  Int     @map("max_select") // 1 = radio, >1 = checkbox
+
+//   options   ModifierOption[]
+//   menuItems MenuItemModifierGroup[]
+
+//   @@map("modifier_group")
+// }
+
+// model ModifierOption {
+//   id              String        @id @default(uuid())
+//   modifierGroupId String        @map("modifier_group_id")
+//   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+//   name            String
+//   priceDelta      Int           @default(0) @map("price_delta")
+//   isActive        Boolean       @default(true) @map("is_active")
+
+//   cartItemModifiers  CartItemModifier[]
+//   orderItemModifiers OrderItemModifier[]
+
+//   @@index([modifierGroupId])
+//   @@map("modifier_option")
+// }
+
+// model MenuItemModifierGroup {
+//   menuItemId      String        @map("menu_item_id")
+//   modifierGroupId String        @map("modifier_group_id")
+//   menuItem        MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+//   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+
+//   @@id([menuItemId, modifierGroupId])
+//   @@map("menu_item_modifier_group")
+// }
+
+// model Promotion {
+//   id            String       @id @default(uuid())
+//   name          String
+//   discountType  DiscountType @map("discount_type")
+//   discountValue Int          @map("discount_value")
+//   startsAt      DateTime     @map("starts_at")
+//   endsAt        DateTime     @map("ends_at")
+//   isActive      Boolean      @default(true) @map("is_active")
+
+//   billDiscounts BillDiscount[]
+
+//   @@map("promotion")
+// }
+
+model Customer {
+  id             String          @id @default(uuid())
+  lineUserId     String          @unique @map("line_user_id")
+  displayName    String          @map("display_name")
+  pictureUrl     String          @map("picture_url")
+  isOaFriend     Boolean         @default(false) @map("is_oa_friend")
+  firstSeenAt    DateTime        @default(now()) @map("first_seen_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  sessionMembers SessionMember[]
+
+  @@map("customer")
+}
+
+model TableSession {
+  id             String          @id @default(uuid())
+  diningTableId  String          @map("dining_table_id")
+  diningTable    DiningTable     @relation(fields: [diningTableId], references: [id], onDelete: Restrict)
+  status         SessionStatus   @default(OPEN)
+  openedAt       DateTime        @default(now()) @map("opened_at")
+  closedAt       DateTime?       @map("closed_at")
+  sessionMembers SessionMember[]
+  carts          Cart[]
+  orderRounds    OrderRound[]
+  bills          Bill[]
+
+  @@index([diningTableId, status])
+  @@map("table_session")
+}
+
+model SessionMember {
+  id             String       @id @default(uuid())
+  tableSessionId String       @map("table_session_id")
+  tableSession   TableSession @relation(fields: [tableSessionId], references: [id], onDelete: Cascade)
+  customerId     String       @map("customer_id")
+  customer       Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  sessionToken   String       @unique @map("session_token")
+  joinedAt       DateTime     @default(now()) @map("joined_at")
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  billShares     BillShare[]
+
+  @@unique([tableSessionId, customerId])
+  @@map("session_member")
+}
+
+model Cart {
+  id             String       @id @default(uuid())
+  tableSessionId String       @unique @map("table_session_id")
+  tableSession   TableSession @relation(fields: [tableSessionId], references: [id], onDelete: Cascade)
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  cartItems      CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id         String        @id @default(uuid())
+  cartId     String        @map("cart_id")
+  cart       Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  menuItemId String        @map("menu_item_id")
+  menuItem   MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  addedBy    String        @map("added_by")
+  member     SessionMember @relation(fields: [addedBy], references: [id], onDelete: Cascade)
+  quantity   Int
+  note       String        @default("")
+  addedAt    DateTime      @default(now()) @map("added_at")
+
+  @@index([cartId])
+  @@map("cart_item")
+}
+
+// model CartItemModifier {
+//   cartItemId       String @map("cart_item_id")
+//   modifierOptionId String @map("modifier_option_id")
+//   cartItem         CartItem       @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+//   modifierOption   ModifierOption @relation(fields: [modifierOptionId], references: [id], onDelete: Restrict)
+
+//   @@id([cartItemId, modifierOptionId])
+//   @@map("cart_item_modifier")
+// }
+
+model OrderRound {
+  id             String           @id @default(uuid())
+  tableSessionId String           @map("table_session_id")
+  tableSession   TableSession     @relation(fields: [tableSessionId], references: [id], onDelete: Cascade)
+  roundNumber    Int              @map("round_number")
+  status         OrderRoundStatus @default(SUBMITTED)
+  submittedAt    DateTime         @default(now()) @map("submitted_at")
+  orderItems     OrderItem[]
+
+  @@unique([tableSessionId, roundNumber])
+  @@map("order_round")
+}
+
+model OrderItem {
+  id                String          @id @default(uuid())
+  orderRoundId      String          @map("order_round_id")
+  orderRound        OrderRound      @relation(fields: [orderRoundId], references: [id], onDelete: Cascade)
+  menuItemId        String          @map("menu_item_id")
+  menuItem          MenuItem        @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  addedBy           String          @map("added_by")
+  member            SessionMember   @relation(fields: [addedBy], references: [id], onDelete: Restrict)
+  quantity          Int
+  unitPriceSnapshot Int             @map("unit_price_snapshot")
+  nameSnapshot      String          @map("name_snapshot")
+  note              String          @default("")
+  status            OrderItemStatus @default(PENDING)
+  startedAt         DateTime?       @map("started_at")
+  estimatedMinutes  Int             @map("estimated_minutes")
+
+  @@index([orderRoundId])
+  @@map("order_item")
+}
+
+// model OrderItemModifier {
+//   id                   String   @id @default(uuid())
+//   orderItemId          String   @map("order_item_id")
+//   orderItem            OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+//   modifierOptionId     String   @map("modifier_option_id")
+//   modifierOption       ModifierOption @relation(fields: [modifierOptionId], references: [id], onDelete: Restrict)
+//   nameSnapshot         String   @map("name_snapshot")
+//   priceDeltaSnapshot   Int      @map("price_delta_snapshot")
+
+//   @@index([orderItemId])
+//   @@map("order_item_modifier")
+// }
+
+model Bill {
+  id                        String         @id @default(uuid())
+  tableSessionId            String         @map("table_session_id")
+  tableSession              TableSession   @relation(fields: [tableSessionId], references: [id], onDelete: Restrict)
+  status                    BillStatus     @default(OPEN)
+  splitMethod               SplitMethod    @map("split_method")
+  subtotal                  Int
+  discountAmount            Int            @map("discount_amount")
+  serviceChargeRateSnapshot Float          @map("service_charge_rete_snapshot")
+  serviceChargeAmount       Int            @map("service_charge_amount")
+  vatRateSnapShot           Float          @map("vat_rate_snapshot")
+  vatAmount                 Int            @map("vat_amount")
+  grandTotal                Int            @map("grand_total")
+  currencySnapShot          String         @default("THB ") @map("currency_snapshot")
+  issuedBy                  String?        @map("issued_by")
+  issuer                    StaffUser?     @relation("BillIssuedBy", fields: [issuedBy], references: [id], onDelete: SetNull)
+  issuedAt                  DateTime       @default(now()) @map("issued_at")
+  settledAt                 DateTime?      @map("settled_at")
+  billDiscounts             BillDiscount[]
+  billShares                BillShare[]
+
+  @@index([tableSessionId, status])
+  @@map("bill")
+}
+
+model BillDiscount {
+  id             String @id @default(ulid())
+  billId         String @map("bill_id")
+  bill           Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+  amountSnapshot Int    @map("amount_snapshot")
+
+  @@index([billId])
+  @@map("bill_discount")
+}
+
+model BillShare {
+  id              String          @id @default(uuid())
+  billId          String          @map("bill_id")
+  bill            Bill            @relation(fields: [billId], references: [id], onDelete: Cascade)
+  sessionMemberId String          @map("session_member_id")
+  member          SessionMember   @relation(fields: [sessionMemberId], references: [id], onDelete: Restrict)
+  amountDue       Int             @map("amount_due")
+  status          BillShareStatus @default(UNPAID)
+  payments        Payment[]
+
+  @@index([billId])
+  @@map("bill_share")
+}
+
+model Payment {
+  id          String            @id @default(uuid())
+  billShareId String            @map("bill_share_id")
+  billShare   BillShare         @relation(fields: [billShareId], references: [id], onDelete: Cascade)
+  method      PaymentMethodCode
+  amount      Int
+  status      PaymentStatus     @default(PENDING)
+  confirmedBy String?           @map("confirmed_by")
+  confirmer   StaffUser?        @relation("PaymentConfirmedBy", fields: [confirmedBy], references: [id], onDelete: SetNull)
+  markedBy    String?           @map("marked_by")
+  marker      StaffUser?        @relation("PaymentMarkedBy", fields: [markedBy], references: [id], onDelete: SetNull)
+  gatewayRef  String?           @map("gateway_ref")
+  notifiedAt  DateTime?         @map("notified_at")
+  paidAt      DateTime?         @map("paid_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  @@index([billShareId])
+  @@map("payment")
+}
