@@ -7,7 +7,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1),
 });
 
-export function validateEnv(config: unknown) {
+export function validateEnv(config: Record<string, any>) {
   const parsed = envSchema.safeParse(config);
 
   if (!parsed.success) {
