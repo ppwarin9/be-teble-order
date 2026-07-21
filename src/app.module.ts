@@ -5,6 +5,7 @@ import { validateEnv } from '@/config/env.validation';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { PrismaExceptionFilter } from '@/common/filters/prisma-exception.filter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
         limit: 100,
       },
     ]),
+    HealthModule,
   ],
   providers: [
     {
