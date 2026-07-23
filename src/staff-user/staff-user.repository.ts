@@ -21,14 +21,22 @@ export class StaffUserRepository {
   }
 
   async findByEmail(email: string): Promise<StaffUser | null> {
-    return this.prisma.staffUser.findUnique({
-      where: { email },
+    return this.prisma.staffUser.findFirst({
+      where: {
+        email,
+        isActive: true,
+        deletedAt: null,
+      },
     });
   }
 
   async findById(id: string): Promise<StaffUser | null> {
-    return this.prisma.staffUser.findUnique({
-      where: { id },
+    return this.prisma.staffUser.findFirst({
+      where: {
+        id,
+        isActive: true,
+        deletedAt: null,
+      },
     });
   }
 
