@@ -6,6 +6,8 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { PrismaExceptionFilter } from '@/common/filters/prisma-exception.filter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
+import { StaffUserModule } from './staff-user/staff-user.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { HealthModule } from './health/health.module';
       },
     ]),
     HealthModule,
+    AuthModule,
+    StaffUserModule,
   ],
   providers: [
     {
