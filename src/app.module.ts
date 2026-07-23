@@ -11,6 +11,7 @@ import { StaffUserModule } from './staff-user/staff-user.module';
 import { RoleModule } from './role/role.module';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/auth/guards/roles.guard';
+import { StoreSettingModule } from './store-setting/store-setting.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { RolesGuard } from '@/auth/guards/roles.guard';
     AuthModule,
     StaffUserModule,
     RoleModule,
+    StoreSettingModule,
   ],
   providers: [
     {
