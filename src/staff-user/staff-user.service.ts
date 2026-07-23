@@ -16,14 +16,16 @@ export class StaffUserService {
     return this.staffUserRepository.findAll();
   }
 
-  async getStaffUserByEmail(email: string): Promise<StaffUser> {
+  async findByEmail(email: string): Promise<Omit<StaffUser, 'passwordHash'>> {
     const staff = await this.staffUserRepository.findByEmail(email);
 
     if (!staff) {
       throw new NotFoundException(`ไม่พบผู้ใช้งานอีเมล ${email} ในระบบ`);
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash: _, ...result } = staff;
 
-    return staff;
+    return result;
   }
 
   async getStaffUserById(id: string): Promise<StaffUser> {
