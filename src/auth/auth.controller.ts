@@ -1,9 +1,23 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { StaffUser } from '@/database/generated/prisma/client';
 import { Public } from '@/common/decorators/public.decorator';
+import { type JwtPayload } from '@/auth/types/jwt-payload.type';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,5 +45,12 @@ export class AuthController {
     );
 
     return this.authService.login(validStaff);
+  }
+
+  @ApiOperation({ summary: 'Get current logged-in staff profile' })
+  @ApiBearerAuth()
+  @Get('me')
+  getCurrentStaff(@Request() req: { user: JwtPayload }) {
+    return req.user;
   }
 }
