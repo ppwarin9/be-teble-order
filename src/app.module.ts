@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { StaffUserModule } from './staff-user/staff-user.module';
 import { RoleModule } from './role/role.module';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -34,6 +35,10 @@ import { RoleModule } from './role/role.module';
     {
       provide: APP_FILTER,
       useClass: PrismaExceptionFilter as Type<ExceptionFilter>,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
