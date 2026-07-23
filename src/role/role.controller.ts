@@ -3,6 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { Role } from '@/database/generated/prisma/client';
+import { Roles } from '@/common/decorators/roles.decorator';
 
 @ApiTags('Role')
 @Controller('roles')
@@ -10,6 +11,7 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post()
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Create a new role' })
   @ApiResponse({ status: 201, description: 'Role created successfully.' })
   @ApiResponse({ status: 409, description: 'Role code already exists.' })
@@ -18,6 +20,7 @@ export class RoleController {
   }
 
   @Get()
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Get all available roles' })
   @ApiResponse({ status: 200, description: 'List of roles.' })
   findAll(): Promise<Role[]> {

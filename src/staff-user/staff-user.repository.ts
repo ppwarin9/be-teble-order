@@ -16,9 +16,9 @@ export class StaffUserRepository {
     });
   }
 
-  async findAllActive(): Promise<StaffUser[]> {
+  async getAll(): Promise<StaffUser[]> {
     return this.prisma.staffUser.findMany({
-      where: { isActive: true, deletedAt: null },
+      where: { deletedAt: null },
     });
   }
 

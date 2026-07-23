@@ -33,7 +33,7 @@ export class CreateStaffUserDto {
   name: string;
 
   @ApiProperty({
-    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    example: '83728acd-1560-434a-8069-dc1fed651901',
   })
   @IsUUID('4', { message: 'roleId ไม่ถูกต้อง' })
   roleId: string;

@@ -50,7 +50,7 @@ export class StaffUserService {
   }
 
   async getAllStaffUsers(): Promise<Omit<StaffUser, 'passwordHash'>[]> {
-    const staffList = await this.staffUserRepository.findAllActive();
+    const staffList = await this.staffUserRepository.getAll();
 
     return staffList.map((staff) => this.excludePassword(staff));
   }

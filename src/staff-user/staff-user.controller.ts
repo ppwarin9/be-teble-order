@@ -1,3 +1,5 @@
+import { Roles } from '@/common/decorators/roles.decorator';
+import { StaffUser } from '@/database/generated/prisma/client';
 import {
   Body,
   Controller,
@@ -9,10 +11,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StaffUserService } from './staff-user.service';
 import { CreateStaffUserDto } from './dto/create-staff-user.dto';
 import { UpdateStaffUserDto } from './dto/update-staff-user.dto';
-import { StaffUser } from '@/database/generated/prisma/client';
+import { StaffUserService } from './staff-user.service';
 
 @ApiTags('Staff User')
 @Controller('staff-user')
@@ -20,6 +21,7 @@ export class StaffUserController {
   constructor(private readonly staffUserService: StaffUserService) {}
 
   @Post()
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Create a new staff user' })
   @ApiResponse({
     status: 201,
@@ -33,13 +35,15 @@ export class StaffUserController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all active staff users' })
-  @ApiResponse({ status: 200, description: 'List of active staff users.' })
-  findAll(): Promise<Omit<StaffUser, 'passwordHash'>[]> {
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Get all staff users' })
+  @ApiResponse({ status: 200, description: 'List of staff users.' })
+  getAll(): Promise<Omit<StaffUser, 'passwordHash'>[]> {
     return this.staffUserService.getAllStaffUsers();
   }
 
   @Get(':id')
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Get a staff user by id' })
   @ApiResponse({ status: 200, description: 'Staff user found.' })
   @ApiResponse({ status: 404, description: 'Staff user not found.' })
@@ -50,6 +54,7 @@ export class StaffUserController {
   }
 
   @Patch(':id')
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Update a staff user' })
   @ApiResponse({ status: 200, description: 'Staff user updated.' })
   @ApiResponse({ status: 404, description: 'Staff user not found.' })
@@ -61,6 +66,7 @@ export class StaffUserController {
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Soft-delete a staff user' })
   @ApiResponse({ status: 200, description: 'Staff user soft-deleted.' })
   @ApiResponse({ status: 404, description: 'Staff user not found.' })
