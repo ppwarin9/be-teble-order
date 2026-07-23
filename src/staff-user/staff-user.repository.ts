@@ -14,9 +14,9 @@ export class StaffUserRepository {
     });
   }
 
-  async findAll(): Promise<StaffUser[]> {
+  async findAllActive(): Promise<StaffUser[]> {
     return this.prisma.staffUser.findMany({
-      where: { deletedAt: null },
+      where: { isActive: true, deletedAt: null },
     });
   }
 
@@ -50,7 +50,7 @@ export class StaffUserRepository {
     });
   }
 
-  async remove(id: string): Promise<StaffUser> {
+  async softDelete(id: string): Promise<StaffUser> {
     return this.prisma.staffUser.update({
       where: { id },
       data: {

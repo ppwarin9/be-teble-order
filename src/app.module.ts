@@ -8,6 +8,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { StaffUserModule } from './staff-user/staff-user.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { StaffUserModule } from './staff-user/staff-user.module';
     HealthModule,
     AuthModule,
     StaffUserModule,
+    RoleModule,
   ],
   providers: [
     {

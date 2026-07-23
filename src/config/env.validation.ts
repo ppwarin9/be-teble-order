@@ -3,8 +3,10 @@ import { Logger } from '@nestjs/common';
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().min(0).max(65535),
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.url(),
   JWT_SECRET: z.string().min(1),
+  JWT_EXPIRES_IN: z.string().min(1),
+  CORS_ORIGIN: z.string().min(1),
 });
 
 export function validateEnv(config: Record<string, any>) {

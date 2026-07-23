@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"TSC EXIT:$?\")",
+      "Bash(echo \"LINT EXIT:$?\")",
+      "Bash(grep -v \"database\\\\\\\\\\\\\\\\generated\\\\\\\\|prisma-exception\\\\|app.module\")",
+      "Bash(echo \"LINT \\(excl. known pre-existing\\) EXIT:$?\")",
+      "Bash(rm -rf dist)"
+    ]
+  }
+}
