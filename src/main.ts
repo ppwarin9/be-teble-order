@@ -1,8 +1,13 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +25,14 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  // Strips fields marked @Exclude() (e.g. passwordHash) whenever a controller
+  // returns a real class instance of a response DTO.
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  // Handles standard Nest HttpExceptions (validation, 404, 401, ...). Prisma
+  // errors are handled separately by PrismaExceptionFilter (see app.module.ts).
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()

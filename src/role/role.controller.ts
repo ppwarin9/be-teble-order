@@ -1,8 +1,14 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { Role } from '@/database/generated/prisma/client';
+import { RoleResponseDto } from './dto/role-response.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 
 @ApiTags('Role')
@@ -13,17 +19,20 @@ export class RoleController {
   @Post()
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Create a new role' })
-  @ApiResponse({ status: 201, description: 'Role created successfully.' })
-  @ApiResponse({ status: 409, description: 'Role code already exists.' })
-  create(@Body() createRoleDto: CreateRoleDto): Promise<Role> {
+  @ApiCreatedResponse({
+    description: 'Role created successfully.',
+    type: RoleResponseDto,
+  })
+  @ApiConflictResponse({ description: 'Role code already exists.' })
+  create(@Body() createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
     return this.roleService.createRole(createRoleDto);
   }
 
   @Get()
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Get all available roles' })
-  @ApiResponse({ status: 200, description: 'List of roles.' })
-  findAll(): Promise<Role[]> {
+  @ApiOkResponse({ description: 'List of roles.', type: [RoleResponseDto] })
+  findAll(): Promise<RoleResponseDto[]> {
     return this.roleService.getAllRoles();
   }
 }

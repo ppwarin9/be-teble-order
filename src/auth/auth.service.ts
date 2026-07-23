@@ -1,8 +1,12 @@
 import { StaffUserWithRole } from '@/staff-user/staff-user.repository';
-import { BcryptService } from '@/shared/security/bcrypt.service';
+import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
 import { StaffUserService } from '@/staff-user/staff-user.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { plainToInstance } from 'class-transformer';
+import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
+import { AuthMeResponseDto } from './dto/auth-me-response.dto';
+import { type JwtPayload } from '@/auth/types/jwt-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -37,16 +41,26 @@ export class AuthService {
     return result;
   }
 
-  login(staff: Omit<StaffUserWithRole, 'passwordHash'>) {
+  login(staff: Omit<StaffUserWithRole, 'passwordHash'>): AuthLoginResponseDto {
     const payload = {
       sub: staff.id,
       email: staff.email,
       role: staff.role.code,
     };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: staff,
-    };
+    return plainToInstance(
+      AuthLoginResponseDto,
+      {
+        accessToken: this.jwtService.sign(payload),
+        user: staff,
+      },
+      { excludeExtraneousValues: true },
+    );
+  }
+
+  getProfile(payload: JwtPayload): AuthMeResponseDto {
+    return plainToInstance(AuthMeResponseDto, payload, {
+      excludeExtraneousValues: true,
+    });
   }
 }

@@ -6,7 +6,25 @@
       "Bash(grep -v \"database\\\\\\\\\\\\\\\\generated\\\\\\\\|prisma-exception\\\\|app.module\")",
       "Bash(echo \"LINT \\(excl. known pre-existing\\) EXIT:$?\")",
       "Bash(rm -rf dist)",
-      "Bash(npx jest *)"
+      "Bash(npx jest *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o 'C:\\\\Users\\\\banan\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Personal-Project-be-table-order\\\\47d54e3d-e374-4b6c-afdd-2dcab057b52c\\\\scratchpad/swagger.json' http://localhost:9999/docs-json)",
+      "Read(//c/Users/banan/AppData/Local/Temp/claude/c--Personal-Project-be-table-order/47d54e3d-e374-4b6c-afdd-2dcab057b52c/scratchpad/**)",
+      "Bash(powershell -NoProfile -Command 'Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -eq '\\\\'''\\\\'' } | Select-Object Id')",
+      "Bash(netstat -ano)",
+      "Bash(powershell -NoProfile -Command \"Stop-Process -Id 23908 -Force\")",
+      "Bash(npx eslint *)",
+      "Bash(git rm *)",
+      "Bash(curl -s -w \"\\\\nHTTP:%{http_code}\\\\n\" http://localhost:9999/api/v1/does-not-exist)",
+      "Bash(curl -s -w \"\\\\nHTTP:%{http_code}\\\\n\" -X POST http://localhost:9999/api/v1/auth/login -H \"Content-Type: application/json\" -d \"{}\")",
+      "Bash(curl -s -w \"\\\\nHTTP:%{http_code}\\\\n\" http://localhost:9999/api/v1/staff-user)",
+      "Bash(curl -s http://localhost:9999/docs-json -o swagger2.json)",
+      "Bash(powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 9999 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(powershell -NoProfile -Command \"Stop-Process -Id 20052 -Force\")"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

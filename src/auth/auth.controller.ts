@@ -9,13 +9,15 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { StaffUser } from '@/database/generated/prisma/client';
+import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
+import { AuthMeResponseDto } from './dto/auth-me-response.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { type JwtPayload } from '@/auth/types/jwt-payload.type';
 
@@ -28,17 +30,12 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Staff login with email and password' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: 'Login successful, returns access token and staff profile.',
+    type: AuthLoginResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid email or password.',
-  })
-  async login(
-    @Body() loginDto: LoginDto,
-  ): Promise<{ access_token: string; user: Omit<StaffUser, 'passwordHash'> }> {
+  @ApiUnauthorizedResponse({ description: 'Invalid email or password.' })
+  async login(@Body() loginDto: LoginDto): Promise<AuthLoginResponseDto> {
     const validStaff = await this.authService.validateStaff(
       loginDto.email,
       loginDto.password,
@@ -49,8 +46,9 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Get current logged-in staff profile' })
   @ApiBearerAuth()
+  @ApiOkResponse({ type: AuthMeResponseDto })
   @Get('me')
-  getCurrentStaff(@Request() req: { user: JwtPayload }) {
-    return req.user;
+  getCurrentStaff(@Request() req: { user: JwtPayload }): AuthMeResponseDto {
+    return this.authService.getProfile(req.user);
   }
 }
