@@ -1,13 +1,13 @@
-import { StaffUser } from '@/database/generated/prisma/client';
+import { StaffUserWithRole } from '@/staff-user/staff-user.repository';
 import { BcryptService } from '@/shared/security/bcrypt.service';
-import { StaffUserRepository } from '@/staff-user/staff-user.repository';
+import { StaffUserService } from '@/staff-user/staff-user.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly staffUserRepository: StaffUserRepository,
+    private readonly staffUserService: StaffUserService,
     private readonly bcryptService: BcryptService,
     private readonly jwtService: JwtService,
   ) {}
@@ -15,8 +15,8 @@ export class AuthService {
   async validateStaff(
     email: string,
     pass: string,
-  ): Promise<Omit<StaffUser, 'passwordHash'>> {
-    const staff = await this.staffUserRepository.findByEmail(email);
+  ): Promise<Omit<StaffUserWithRole, 'passwordHash'>> {
+    const staff = await this.staffUserService.findByEmailWithPassword(email);
 
     if (!staff) {
       throw new UnauthorizedException('Invalid Email or Password');
@@ -37,11 +37,11 @@ export class AuthService {
     return result;
   }
 
-  login(staff: Omit<StaffUser, 'passwordHash'>) {
+  login(staff: Omit<StaffUserWithRole, 'passwordHash'>) {
     const payload = {
       sub: staff.id,
       email: staff.email,
-      role: staff.roleId,
+      role: staff.role.code,
     };
 
     return {

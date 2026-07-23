@@ -3,10 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { StaffUserRepository } from './staff-user.repository';
+import {
+  StaffUserRepository,
+  StaffUserWithRole,
+} from './staff-user.repository';
 import { Prisma, StaffUser } from '@/database/generated/prisma/client';
 import { BcryptService } from '@/shared/security/bcrypt.service';
-import { RoleRepository } from '@/role/role.repository';
+import { RoleService } from '@/role/role.service';
 import { CreateStaffUserDto } from './dto/create-staff-user.dto';
 
 @Injectable()
@@ -14,7 +17,7 @@ export class StaffUserService {
   constructor(
     private readonly staffUserRepository: StaffUserRepository,
     private readonly bcryptService: BcryptService,
-    private readonly roleRepository: RoleRepository,
+    private readonly roleService: RoleService,
   ) {}
 
   private excludePassword(staff: StaffUser): Omit<StaffUser, 'passwordHash'> {
@@ -26,7 +29,7 @@ export class StaffUserService {
   async createStaffUser(
     dto: CreateStaffUserDto,
   ): Promise<Omit<StaffUser, 'passwordHash'>> {
-    const role = await this.roleRepository.findById(dto.roleId);
+    const role = await this.roleService.findById(dto.roleId);
 
     if (!role) {
       throw new BadRequestException(
@@ -50,6 +53,13 @@ export class StaffUserService {
     const staffList = await this.staffUserRepository.findAllActive();
 
     return staffList.map((staff) => this.excludePassword(staff));
+  }
+
+  // Includes passwordHash — for AuthService's login check only, never expose via a controller.
+  async findByEmailWithPassword(
+    email: string,
+  ): Promise<StaffUserWithRole | null> {
+    return this.staffUserRepository.findByEmail(email);
   }
 
   async findByEmail(email: string): Promise<Omit<StaffUser, 'passwordHash'>> {

@@ -1,6 +1,8 @@
-import { Prisma, StaffUser } from '@/database/generated/prisma/client';
+import { Prisma, Role, StaffUser } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
 import { Injectable } from '@nestjs/common';
+
+export type StaffUserWithRole = StaffUser & { role: Role };
 
 @Injectable()
 export class StaffUserRepository {
@@ -20,13 +22,14 @@ export class StaffUserRepository {
     });
   }
 
-  async findByEmail(email: string): Promise<StaffUser | null> {
+  async findByEmail(email: string): Promise<StaffUserWithRole | null> {
     return this.prisma.staffUser.findFirst({
       where: {
         email,
         isActive: true,
         deletedAt: null,
       },
+      include: { role: true },
     });
   }
 
