@@ -22,7 +22,7 @@ export class StoreSettingResponseDto {
 
   @Expose()
   @ApiProperty({ example: 0.1 })
-  serviceCharge: number;
+  serviceChargeRate: number;
 
   @Expose()
   @ApiProperty({ example: 'THB' })
@@ -38,4 +38,8 @@ export class StoreSettingResponseDto {
     enum: ['EQUAL', 'SINGLE_PAYER'],
   })
   defaultSplitMethod: SplitMethod;
+
+  @Expose()
+  @ApiProperty({ example: '2026-07-24T09:13:04.000Z' })
+  updatedAt: Date;
 }
