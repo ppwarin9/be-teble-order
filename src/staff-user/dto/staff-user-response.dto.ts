@@ -12,7 +12,7 @@ export class StaffUserResponseDto {
   email: string;
 
   @Expose()
-  @ApiProperty({ example: 'สมชาย ใจดี' })
+  @ApiProperty({ example: 'John Doe' })
   name: string;
 
   @Expose()
@@ -30,8 +30,4 @@ export class StaffUserResponseDto {
   @Expose()
   @ApiProperty({ example: '2026-01-15T08:30:00.000Z' })
   updatedAt: Date;
-
-  // Guards against a leak even if a caller forgets `excludeExtraneousValues`.
-  @Exclude()
-  passwordHash?: string;
 }

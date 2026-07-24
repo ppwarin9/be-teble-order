@@ -13,7 +13,7 @@ export class CreateStaffUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsEmail({}, { message: 'รูปแบบอีเมลไม่ถูกต้อง' })
+  @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 
   @ApiProperty({
@@ -22,19 +22,19 @@ export class CreateStaffUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' })
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
   password: string;
 
   @ApiProperty({
-    example: 'สมชาย ใจดี',
+    example: 'John Doe',
   })
   @IsString()
-  @IsNotEmpty({ message: 'กรุณาระบุชื่อ' })
+  @IsNotEmpty({ message: 'Name is required' })
   name: string;
 
   @ApiProperty({
     example: '83728acd-1560-434a-8069-dc1fed651901',
   })
-  @IsUUID('4', { message: 'roleId ไม่ถูกต้อง' })
+  @IsUUID('4', { message: 'Invalid roleId' })
   roleId: string;
 }

@@ -35,7 +35,7 @@ export class StaffUserService {
 
     if (!role) {
       throw new BadRequestException(
-        `ไม่พบตำแหน่งงาน (roleId) ${dto.roleId} ในระบบ`,
+        `Role (roleId) ${dto.roleId} not found`,
       );
     }
 
@@ -68,7 +68,7 @@ export class StaffUserService {
     const staff = await this.staffUserRepository.findById(id);
 
     if (!staff || staff.deletedAt !== null) {
-      throw new NotFoundException(`ไม่พบผู้ใช้งาน ID ${id} ในระบบ`);
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
 
     return this.toResponseDto(staff);

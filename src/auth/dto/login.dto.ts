@@ -7,7 +7,7 @@ export class LoginDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsEmail({}, { message: 'รูปแบบอีเมลไม่ถูกต้อง' })
+  @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 
   @ApiProperty({
@@ -16,6 +16,6 @@ export class LoginDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' })
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
   password: string;
 }

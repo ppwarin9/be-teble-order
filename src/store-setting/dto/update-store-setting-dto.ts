@@ -13,12 +13,12 @@ export type SplitMethod = 'EQUAL' | 'SINGLE_PAYER';
 export class UpdateStoreSettingDto {
   @ApiPropertyOptional({ example: true })
   @IsOptional()
-  @IsBoolean({ message: 'enableVat ต้องเป็น boolean' })
+  @IsBoolean({ message: 'enableVat must be a boolean' })
   enableVat?: boolean;
 
   @ApiPropertyOptional({ example: 0.07 })
   @IsOptional()
-  @IsNumber({}, { message: 'vatRate ต้องเป็นตัวเลข' })
+  @IsNumber({}, { message: 'vatRate must be a number' })
   @Min(0)
   vatRate?: number;
 
