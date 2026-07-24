@@ -1,4 +1,5 @@
 import { StoreSetting } from '@/database/generated/prisma/client';
+import { UpdateStoreSettingDto } from '@/store-setting/dto/update-store-setting-dto';
 import { StoreSettingRepository } from '@/store-setting/store-setting.repository';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
@@ -34,5 +35,15 @@ export class StoreSettingService {
     await this.cacheManager.set(this.CACHE_KEY, setting);
 
     return setting;
+  }
+
+  async update(dto: UpdateStoreSettingDto): Promise<StoreSetting> {
+    const currentSetting = await this.get();
+
+    const updatedSetting = await this.repository.update(currentSetting.id, dto);
+
+    await this.cacheManager.set(this.CACHE_KEY, updatedSetting);
+
+    return updatedSetting;
   }
 }
