@@ -12,6 +12,7 @@ import { RoleModule } from './role/role.module';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/auth/guards/roles.guard';
 import { StoreSettingModule } from './store-setting/store-setting.module';
+import { DiningTableModule } from './dining-table/dining-table.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { StoreSettingModule } from './store-setting/store-setting.module';
     StaffUserModule,
     RoleModule,
     StoreSettingModule,
+    DiningTableModule,
   ],
   providers: [
     {
