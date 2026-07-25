@@ -19,4 +19,15 @@ export class RoleRepository {
   async getById(id: string): Promise<Role | null> {
     return this.prisma.role.findUnique({ where: { id } });
   }
+
+  async delete(id: string): Promise<Role> {
+    return this.prisma.role.delete({ where: { id } });
+  }
+
+  async hasStaffUsers(roleId: string): Promise<boolean> {
+    const staffUser = await this.prisma.staffUser.findFirst({
+      where: { roleId },
+    });
+    return !!staffUser;
+  }
 }

@@ -1,9 +1,21 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -40,5 +52,18 @@ export class RoleController {
   async findAll(): Promise<RoleResponseDto[]> {
     const roles = await this.roleService.getAllRoles();
     return roles.map((role) => new RoleResponseDto(role));
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a role' })
+  @ApiNoContentResponse({ description: 'Role successfully deleted' })
+  @ApiNotFoundResponse({ description: 'Role not found' })
+  @ApiConflictResponse({
+    description: 'Cannot delete a role that is still assigned to staff users',
+  })
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.roleService.deleteRole(id);
   }
 }
