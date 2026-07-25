@@ -13,6 +13,8 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/auth/guards/roles.guard';
 import { StoreSettingModule } from './store-setting/store-setting.module';
 import { DiningTableModule } from './dining-table/dining-table.module';
+import { MenuCategoryModule } from './menu-category/menu-category.module';
+import { MenuItemModule } from './menu-item/menu-item.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { DiningTableModule } from './dining-table/dining-table.module';
     RoleModule,
     StoreSettingModule,
     DiningTableModule,
+    MenuCategoryModule,
+    MenuItemModule,
   ],
   providers: [
     {
