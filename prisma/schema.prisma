@@ -132,7 +132,7 @@ model MenuItem {
   name                    String
   description             String
   price                   Int
-  imageUrl                String       @map("image_url")
+  imageUrl                String?      @map("image_url")
   estimatedCookingMinutes Int          @map("estimated_cooking_minutes")
   isAvailable             Boolean      @default(true) @map("is_available")
   createdAt               DateTime     @default(now()) @map("created_at")
