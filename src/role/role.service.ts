@@ -6,6 +6,7 @@ import {
 import { RoleRepository } from './role.repository';
 import { Role } from '@/database/generated/prisma/client';
 import { CreateRoleDto } from '@/role/dto/create-role.dto';
+import { UpdateRoleDto } from '@/role/dto/update-role.dto';
 
 @Injectable()
 export class RoleService {
@@ -19,9 +20,22 @@ export class RoleService {
     return this.roleRepository.getAll();
   }
 
+  async getRoleById(id: string): Promise<Role> {
+    const role = await this.roleRepository.getById(id);
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+    return role;
+  }
+
   // Internal lookup used by StaffUserService to validate a roleId — not exposed via a controller.
-  async findById(id: string): Promise<Role | null> {
+  async getById(id: string): Promise<Role | null> {
     return this.roleRepository.getById(id);
+  }
+
+  async updateRole(id: string, dto: UpdateRoleDto): Promise<Role> {
+    await this.getRoleById(id);
+    return this.roleRepository.update(id, dto);
   }
 
   async deleteRole(id: string): Promise<void> {

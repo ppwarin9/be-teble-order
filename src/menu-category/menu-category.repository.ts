@@ -33,4 +33,17 @@ export class MenuCategoryRepository {
       data,
     });
   }
+
+  async delete(id: string): Promise<MenuCategory> {
+    return this.prisma.menuCategory.delete({
+      where: { id },
+    });
+  }
+
+  async hasMenuItems(categoryId: string): Promise<boolean> {
+    const menuItem = await this.prisma.menuItem.findFirst({
+      where: { categoryId, deletedAt: null },
+    });
+    return !!menuItem;
+  }
 }

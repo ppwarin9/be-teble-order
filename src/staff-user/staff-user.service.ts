@@ -1,3 +1,8 @@
+import { StaffUser } from '@/database/generated/prisma/client';
+import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
+import { RoleService } from '@/role/role.service';
+import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
+import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
 import {
   BadRequestException,
   Injectable,
@@ -7,11 +12,6 @@ import {
   StaffUserRepository,
   StaffUserWithRole,
 } from './staff-user.repository';
-import { StaffUser } from '@/database/generated/prisma/client';
-import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
-import { RoleService } from '@/role/role.service';
-import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
-import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
 
 @Injectable()
 export class StaffUserService {
@@ -22,7 +22,7 @@ export class StaffUserService {
   ) {}
 
   async createStaffUser(dto: CreateStaffUserDto): Promise<StaffUser> {
-    const role = await this.roleService.findById(dto.roleId);
+    const role = await this.roleService.getById(dto.roleId);
 
     if (!role) {
       throw new BadRequestException(`Role (roleId) ${dto.roleId} not found`);
@@ -64,6 +64,14 @@ export class StaffUserService {
     dto: UpdateStaffUserDto,
   ): Promise<StaffUser> {
     await this.getStaffUserById(id);
+
+    if (dto.roleId) {
+      const role = await this.roleService.getById(dto.roleId);
+      if (!role) {
+        throw new BadRequestException(`Role (roleId) ${dto.roleId} not found`);
+      }
+    }
+
     return this.staffUserRepository.update(id, dto);
   }
 

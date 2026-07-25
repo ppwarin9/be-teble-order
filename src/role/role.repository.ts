@@ -20,6 +20,13 @@ export class RoleRepository {
     return this.prisma.role.findUnique({ where: { id } });
   }
 
+  async update(
+    id: string,
+    data: Prisma.RoleUpdateInput | Prisma.RoleUncheckedUpdateInput,
+  ): Promise<Role> {
+    return this.prisma.role.update({ where: { id }, data });
+  }
+
   async delete(id: string): Promise<Role> {
     return this.prisma.role.delete({ where: { id } });
   }

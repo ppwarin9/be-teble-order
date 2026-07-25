@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from '@/role/dto/create-role.dto';
+import { UpdateRoleDto } from '@/role/dto/update-role.dto';
 import { RoleResponseDto } from '@/role/dto/role-response.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 
@@ -52,6 +54,33 @@ export class RoleController {
   async findAll(): Promise<RoleResponseDto[]> {
     const roles = await this.roleService.getAllRoles();
     return roles.map((role) => new RoleResponseDto(role));
+  }
+
+  @Get(':id')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Get a role by id' })
+  @ApiOkResponse({ description: 'Role found.', type: RoleResponseDto })
+  @ApiNotFoundResponse({ description: 'Role not found.' })
+  async getOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<RoleResponseDto> {
+    const role = await this.roleService.getRoleById(id);
+    return new RoleResponseDto(role);
+  }
+
+  @Patch(':id')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Update a role' })
+  @ApiOkResponse({ description: 'Role updated.', type: RoleResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid input data.' })
+  @ApiNotFoundResponse({ description: 'Role not found.' })
+  @ApiConflictResponse({ description: 'Role code already exists.' })
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ): Promise<RoleResponseDto> {
+    const role = await this.roleService.updateRole(id, updateRoleDto);
+    return new RoleResponseDto(role);
   }
 
   @Delete(':id')
