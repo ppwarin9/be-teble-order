@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Request,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -15,10 +14,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
-import { AuthMeResponseDto } from './dto/auth-me-response.dto';
+import { LoginDto } from '@/auth/dto/login.dto';
+import { AuthLoginResponseDto } from '@/auth/dto/auth-login-response.dto';
+import { AuthMeResponseDto } from '@/auth/dto/auth-me-response.dto';
 import { Public } from '@/common/decorators/public.decorator';
+import { CurrentUser } from '@/auth/decorators/current-user.decorator';
 import { type JwtPayload } from '@/auth/types/jwt-payload.type';
 
 @ApiTags('Auth')
@@ -48,7 +48,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: AuthMeResponseDto })
   @Get('me')
-  getCurrentStaff(@Request() req: { user: JwtPayload }): AuthMeResponseDto {
-    return this.authService.getProfile(req.user);
+  getCurrentStaff(@CurrentUser() user: JwtPayload): AuthMeResponseDto {
+    return this.authService.getProfile(user);
   }
 }

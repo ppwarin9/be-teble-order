@@ -1,8 +1,10 @@
 import { StoreSetting } from '@/database/generated/prisma/client';
-import { UpdateStoreSettingDto } from '@/store-setting/dto/update-store-setting-dto';
+import { StoreSettingResponseDto } from '@/store-setting/dto/store-setting-response.dto';
+import { UpdateStoreSettingDto } from '@/store-setting/dto/update-store-setting.dto';
 import { StoreSettingRepository } from '@/store-setting/store-setting.repository';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class StoreSettingService {
@@ -13,10 +15,16 @@ export class StoreSettingService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  async get(): Promise<StoreSetting> {
+  private toResponseDto(setting: StoreSetting): StoreSettingResponseDto {
+    return plainToInstance(StoreSettingResponseDto, setting, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async get(): Promise<StoreSettingResponseDto> {
     const cacheData = await this.cacheManager.get<StoreSetting>(this.CACHE_KEY);
     if (cacheData) {
-      return cacheData;
+      return this.toResponseDto(cacheData);
     }
 
     let setting = await this.repository.findSingleton();
@@ -34,16 +42,16 @@ export class StoreSettingService {
     }
     await this.cacheManager.set(this.CACHE_KEY, setting);
 
-    return setting;
+    return this.toResponseDto(setting);
   }
 
-  async update(dto: UpdateStoreSettingDto): Promise<StoreSetting> {
+  async update(dto: UpdateStoreSettingDto): Promise<StoreSettingResponseDto> {
     const currentSetting = await this.get();
 
     const updatedSetting = await this.repository.update(currentSetting.id, dto);
 
     await this.cacheManager.set(this.CACHE_KEY, updatedSetting);
 
-    return updatedSetting;
+    return this.toResponseDto(updatedSetting);
   }
 }

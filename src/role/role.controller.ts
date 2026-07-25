@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -7,12 +9,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { RoleService } from './role.service';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { RoleResponseDto } from './dto/role-response.dto';
+import { CreateRoleDto } from '@/role/dto/create-role.dto';
+import { RoleResponseDto } from '@/role/dto/role-response.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 
 @ApiTags('Role')
-@Controller('roles')
+@ApiBearerAuth()
+@Controller('admin/roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
@@ -23,6 +26,7 @@ export class RoleController {
     description: 'Role created successfully.',
     type: RoleResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiConflictResponse({ description: 'Role code already exists.' })
   create(@Body() createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
     return this.roleService.createRole(createRoleDto);

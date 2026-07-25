@@ -12,7 +12,6 @@ interface IPrismaError {
   message: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
@@ -23,7 +22,6 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     let message = 'Internal server error';
     let errorCode = 'Unknown';
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       const prismaError = exception as IPrismaError;
       errorCode = prismaError.code;

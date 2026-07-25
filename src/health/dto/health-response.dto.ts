@@ -1,11 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
 
 class HealthIndicatorStatusDto {
+  @Expose()
   @ApiProperty({ example: 'up', enum: ['up', 'down'] })
   status: string;
 }
 
+@Exclude()
 export class HealthResponseDto {
+  @Expose()
   @ApiProperty({
     example: 'ok',
     enum: ['ok', 'error', 'shutting_down'],
@@ -13,6 +17,7 @@ export class HealthResponseDto {
   })
   status: string;
 
+  @Expose()
   @ApiProperty({
     example: { database: { status: 'up' } },
     description: 'Indicators that are currently healthy ("up").',
@@ -22,6 +27,7 @@ export class HealthResponseDto {
   })
   info?: Record<string, HealthIndicatorStatusDto>;
 
+  @Expose()
   @ApiProperty({
     example: {},
     description: 'Indicators that are currently unhealthy ("down").',
@@ -31,6 +37,7 @@ export class HealthResponseDto {
   })
   error?: Record<string, HealthIndicatorStatusDto>;
 
+  @Expose()
   @ApiProperty({
     example: { database: { status: 'up' } },
     description: 'Every health indicator, regardless of status.',

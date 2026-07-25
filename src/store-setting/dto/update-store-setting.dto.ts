@@ -1,3 +1,4 @@
+import { SplitMethod } from '@/database/generated/prisma/enums';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
@@ -7,8 +8,6 @@ import {
   IsOptional,
   Min,
 } from 'class-validator';
-
-export type SplitMethod = 'EQUAL' | 'SINGLE_PAYER';
 
 export class UpdateStoreSettingDto {
   @ApiPropertyOptional({ example: true })

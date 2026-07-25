@@ -11,19 +11,21 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateStaffUserDto } from './dto/create-staff-user.dto';
-import { UpdateStaffUserDto } from './dto/update-staff-user.dto';
-import { StaffUserResponseDto } from './dto/staff-user-response.dto';
+import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
+import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
+import { StaffUserResponseDto } from '@/staff-user/dto/staff-user-response.dto';
 import { StaffUserService } from './staff-user.service';
 
 @ApiTags('Staff User')
-@Controller('staff-user')
+@ApiBearerAuth()
+@Controller('admin/staff-user')
 export class StaffUserController {
   constructor(private readonly staffUserService: StaffUserService) {}
 

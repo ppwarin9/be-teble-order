@@ -1,12 +1,19 @@
 import { Roles } from '@/common/decorators/roles.decorator';
 import { StoreSettingResponseDto } from '@/store-setting/dto/store-setting-response.dto';
-import { UpdateStoreSettingDto } from '@/store-setting/dto/update-store-setting-dto';
+import { UpdateStoreSettingDto } from '@/store-setting/dto/update-store-setting.dto';
 import { StoreSettingService } from '@/store-setting/store-setting.service';
 import { Body, Controller, Get, Patch } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Store Setting')
-@Controller('store-setting')
+@ApiBearerAuth()
+@Controller('admin/store-setting')
 export class StoreSettingController {
   constructor(private readonly storeSettingService: StoreSettingService) {}
 
@@ -28,6 +35,7 @@ export class StoreSettingController {
     description: 'Store Setting updated',
     type: StoreSettingResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Invalid input data.' })
   update(
     @Body() updateStoreSettingDto: UpdateStoreSettingDto,
   ): Promise<StoreSettingResponseDto> {

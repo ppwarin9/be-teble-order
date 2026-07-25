@@ -4,8 +4,8 @@ import { StaffUserService } from '@/staff-user/staff-user.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { plainToInstance } from 'class-transformer';
-import { AuthLoginResponseDto } from './dto/auth-login-response.dto';
-import { AuthMeResponseDto } from './dto/auth-me-response.dto';
+import { AuthLoginResponseDto } from '@/auth/dto/auth-login-response.dto';
+import { AuthMeResponseDto } from '@/auth/dto/auth-me-response.dto';
 import { type JwtPayload } from '@/auth/types/jwt-payload.type';
 
 @Injectable()

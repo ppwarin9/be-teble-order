@@ -8,11 +8,12 @@ import {
   StaffUserRepository,
   StaffUserWithRole,
 } from './staff-user.repository';
-import { Prisma, StaffUser } from '@/database/generated/prisma/client';
+import { StaffUser } from '@/database/generated/prisma/client';
 import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
 import { RoleService } from '@/role/role.service';
-import { CreateStaffUserDto } from './dto/create-staff-user.dto';
-import { StaffUserResponseDto } from './dto/staff-user-response.dto';
+import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
+import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
+import { StaffUserResponseDto } from '@/staff-user/dto/staff-user-response.dto';
 
 @Injectable()
 export class StaffUserService {
@@ -34,9 +35,7 @@ export class StaffUserService {
     const role = await this.roleService.findById(dto.roleId);
 
     if (!role) {
-      throw new BadRequestException(
-        `Role (roleId) ${dto.roleId} not found`,
-      );
+      throw new BadRequestException(`Role (roleId) ${dto.roleId} not found`);
     }
 
     const passwordHash = await this.bcryptService.hash(dto.password);
@@ -76,10 +75,10 @@ export class StaffUserService {
 
   async updateStaffUser(
     id: string,
-    data: Prisma.StaffUserUpdateInput | Prisma.StaffUserUncheckedUpdateInput,
+    dto: UpdateStaffUserDto,
   ): Promise<StaffUserResponseDto> {
     await this.getStaffUserById(id);
-    const updated = await this.staffUserRepository.update(id, data);
+    const updated = await this.staffUserRepository.update(id, dto);
 
     return this.toResponseDto(updated);
   }
