@@ -28,15 +28,17 @@ export class RoleController {
   })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiConflictResponse({ description: 'Role code already exists.' })
-  create(@Body() createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
-    return this.roleService.createRole(createRoleDto);
+  async create(@Body() createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
+    const role = await this.roleService.createRole(createRoleDto);
+    return new RoleResponseDto(role);
   }
 
   @Get()
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Get all available roles' })
   @ApiOkResponse({ description: 'List of roles.', type: [RoleResponseDto] })
-  findAll(): Promise<RoleResponseDto[]> {
-    return this.roleService.getAllRoles();
+  async findAll(): Promise<RoleResponseDto[]> {
+    const roles = await this.roleService.getAllRoles();
+    return roles.map((role) => new RoleResponseDto(role));
   }
 }

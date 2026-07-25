@@ -1,3 +1,4 @@
+import { Trim } from '@/common/decorators/trim.decorator';
 import { SplitMethod } from '@/database/generated/prisma/enums';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
@@ -33,11 +34,13 @@ export class UpdateStoreSettingDto {
   serviceChargeRate?: number;
 
   @ApiPropertyOptional({ example: 'THB' })
+  @Trim()
   @IsOptional()
   @IsString()
   currency?: string;
 
   @ApiPropertyOptional({ example: 'Asia/Bangkok' })
+  @Trim()
   @IsOptional()
   @IsString()
   timezone?: string;

@@ -6,19 +6,19 @@ import { Injectable } from '@nestjs/common';
 export class DiningTableRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<DiningTable[]> {
+  async getAll(): Promise<DiningTable[]> {
     return this.prisma.diningTable.findMany({
       orderBy: { tableNumber: 'asc' },
     });
   }
 
-  async findById(id: string): Promise<DiningTable | null> {
+  async getById(id: string): Promise<DiningTable | null> {
     return this.prisma.diningTable.findUnique({
       where: { id },
     });
   }
 
-  async findByQrToken(qrToken: string): Promise<DiningTable | null> {
+  async getByQrToken(qrToken: string): Promise<DiningTable | null> {
     return this.prisma.diningTable.findUnique({
       where: { qrToken },
     });

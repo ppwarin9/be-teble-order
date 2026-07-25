@@ -37,10 +37,12 @@ export class StaffUserController {
     type: StaffUserResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid roleId.' })
-  create(
+  async create(
     @Body() createStaffUserDto: CreateStaffUserDto,
   ): Promise<StaffUserResponseDto> {
-    return this.staffUserService.createStaffUser(createStaffUserDto);
+    const staff =
+      await this.staffUserService.createStaffUser(createStaffUserDto);
+    return new StaffUserResponseDto(staff);
   }
 
   @Get()
@@ -50,8 +52,9 @@ export class StaffUserController {
     description: 'List of staff users.',
     type: [StaffUserResponseDto],
   })
-  getAll(): Promise<StaffUserResponseDto[]> {
-    return this.staffUserService.getAllStaffUsers();
+  async getAll(): Promise<StaffUserResponseDto[]> {
+    const staffList = await this.staffUserService.getAllStaffUsers();
+    return staffList.map((staff) => new StaffUserResponseDto(staff));
   }
 
   @Get(':id')
@@ -62,10 +65,11 @@ export class StaffUserController {
     type: StaffUserResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Staff user not found.' })
-  findOne(
+  async getOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<StaffUserResponseDto> {
-    return this.staffUserService.getStaffUserById(id);
+    const staff = await this.staffUserService.getStaffUserById(id);
+    return new StaffUserResponseDto(staff);
   }
 
   @Patch(':id')
@@ -76,11 +80,15 @@ export class StaffUserController {
     type: StaffUserResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Staff user not found.' })
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateStaffUserDto: UpdateStaffUserDto,
   ): Promise<StaffUserResponseDto> {
-    return this.staffUserService.updateStaffUser(id, updateStaffUserDto);
+    const staff = await this.staffUserService.updateStaffUser(
+      id,
+      updateStaffUserDto,
+    );
+    return new StaffUserResponseDto(staff);
   }
 
   @Delete(':id')
@@ -91,9 +99,10 @@ export class StaffUserController {
     type: StaffUserResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Staff user not found.' })
-  remove(
+  async remove(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<StaffUserResponseDto> {
-    return this.staffUserService.removeStaffUser(id);
+    const staff = await this.staffUserService.removeStaffUser(id);
+    return new StaffUserResponseDto(staff);
   }
 }

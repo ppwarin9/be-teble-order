@@ -5,6 +5,9 @@
 # docs
 /docs
 
+# claude
+/.claude
+
 # Logs
 logs
 *.log

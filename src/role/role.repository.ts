@@ -12,11 +12,11 @@ export class RoleRepository {
     return this.prisma.role.create({ data });
   }
 
-  async findAll(): Promise<Role[]> {
+  async getAll(): Promise<Role[]> {
     return this.prisma.role.findMany();
   }
 
-  async findById(id: string): Promise<Role | null> {
+  async getById(id: string): Promise<Role | null> {
     return this.prisma.role.findUnique({ where: { id } });
   }
 }

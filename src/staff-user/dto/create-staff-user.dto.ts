@@ -1,3 +1,4 @@
+import { Trim } from '@/common/decorators/trim.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
@@ -11,6 +12,7 @@ export class CreateStaffUserDto {
   @ApiProperty({
     example: 'staff01@example.com',
   })
+  @Trim()
   @IsString()
   @IsNotEmpty()
   @IsEmail({}, { message: 'Invalid email format' })
@@ -28,6 +30,7 @@ export class CreateStaffUserDto {
   @ApiProperty({
     example: 'John Doe',
   })
+  @Trim()
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
   name: string;

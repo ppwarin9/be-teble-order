@@ -24,8 +24,9 @@ export class StoreSettingController {
     description: 'Store Setting details',
     type: StoreSettingResponseDto,
   })
-  get(): Promise<StoreSettingResponseDto> {
-    return this.storeSettingService.get();
+  async get(): Promise<StoreSettingResponseDto> {
+    const setting = await this.storeSettingService.get();
+    return new StoreSettingResponseDto(setting);
   }
 
   @Patch()
@@ -36,9 +37,12 @@ export class StoreSettingController {
     type: StoreSettingResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
-  update(
+  async update(
     @Body() updateStoreSettingDto: UpdateStoreSettingDto,
   ): Promise<StoreSettingResponseDto> {
-    return this.storeSettingService.update(updateStoreSettingDto);
+    const setting = await this.storeSettingService.update(
+      updateStoreSettingDto,
+    );
+    return new StoreSettingResponseDto(setting);
   }
 }

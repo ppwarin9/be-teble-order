@@ -21,25 +21,21 @@ export class DiningTableService {
     });
   }
 
-  async findAll(): Promise<DiningTable[]> {
-    return this.repository.findAll();
+  async getAll(): Promise<DiningTable[]> {
+    return this.repository.getAll();
   }
 
-  async findOne(id: string): Promise<DiningTable> {
-    const table = await this.repository.findById(id);
-    if (!table) {
-      throw new NotFoundException('Dining table not found');
-    }
-    return table;
+  async getOne(id: string): Promise<DiningTable> {
+    return this.findByIdOrThrow(id);
   }
 
   async update(id: string, dto: UpdateDiningTableDto): Promise<DiningTable> {
-    await this.findOne(id);
+    await this.findByIdOrThrow(id);
     return this.repository.update(id, dto);
   }
 
   async regenerateQr(id: string): Promise<DiningTable> {
-    await this.findOne(id);
+    await this.findByIdOrThrow(id);
     const newQrToken = crypto.randomUUID();
 
     return this.repository.update(id, {
@@ -49,7 +45,7 @@ export class DiningTableService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.findOne(id);
+    await this.findByIdOrThrow(id);
 
     const hasActiveSession = await this.repository.hasOpenSession(id);
     if (hasActiveSession) {
@@ -58,5 +54,13 @@ export class DiningTableService {
       );
     }
     await this.repository.delete(id);
+  }
+
+  private async findByIdOrThrow(id: string): Promise<DiningTable> {
+    const table = await this.repository.getById(id);
+    if (!table) {
+      throw new NotFoundException('Dining table not found');
+    }
+    return table;
   }
 }

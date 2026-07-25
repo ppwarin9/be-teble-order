@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 export class StoreSettingRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findSingleton(): Promise<StoreSetting | null> {
+  async getSingleton(): Promise<StoreSetting | null> {
     return this.prisma.storeSetting.findFirst();
   }
 

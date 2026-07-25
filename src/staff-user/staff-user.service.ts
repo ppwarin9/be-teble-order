@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import {
   StaffUserRepository,
   StaffUserWithRole,
@@ -13,7 +12,6 @@ import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
 import { RoleService } from '@/role/role.service';
 import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
 import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
-import { StaffUserResponseDto } from '@/staff-user/dto/staff-user-response.dto';
 
 @Injectable()
 export class StaffUserService {
@@ -23,15 +21,7 @@ export class StaffUserService {
     private readonly roleService: RoleService,
   ) {}
 
-  private toResponseDto(staff: StaffUser): StaffUserResponseDto {
-    return plainToInstance(StaffUserResponseDto, staff, {
-      excludeExtraneousValues: true,
-    });
-  }
-
-  async createStaffUser(
-    dto: CreateStaffUserDto,
-  ): Promise<StaffUserResponseDto> {
+  async createStaffUser(dto: CreateStaffUserDto): Promise<StaffUser> {
     const role = await this.roleService.findById(dto.roleId);
 
     if (!role) {
@@ -40,53 +30,45 @@ export class StaffUserService {
 
     const passwordHash = await this.bcryptService.hash(dto.password);
 
-    const staff = await this.staffUserRepository.create({
+    return this.staffUserRepository.create({
       email: dto.email,
       name: dto.name,
       roleId: dto.roleId,
       passwordHash,
     });
-
-    return this.toResponseDto(staff);
   }
 
-  async getAllStaffUsers(): Promise<StaffUserResponseDto[]> {
-    const staffList = await this.staffUserRepository.getAll();
-
-    return staffList.map((staff) => this.toResponseDto(staff));
+  async getAllStaffUsers(): Promise<StaffUser[]> {
+    return this.staffUserRepository.getAll();
   }
 
   // Includes passwordHash — for AuthService's login check only, never expose via a controller.
-  async findByEmailWithPassword(
+  async getByEmailWithPassword(
     email: string,
   ): Promise<StaffUserWithRole | null> {
-    return this.staffUserRepository.findByEmail(email);
+    return this.staffUserRepository.getByEmail(email);
   }
 
-  async getStaffUserById(id: string): Promise<StaffUserResponseDto> {
-    const staff = await this.staffUserRepository.findById(id);
+  async getStaffUserById(id: string): Promise<StaffUser> {
+    const staff = await this.staffUserRepository.getById(id);
 
     if (!staff || staff.deletedAt !== null) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return this.toResponseDto(staff);
+    return staff;
   }
 
   async updateStaffUser(
     id: string,
     dto: UpdateStaffUserDto,
-  ): Promise<StaffUserResponseDto> {
+  ): Promise<StaffUser> {
     await this.getStaffUserById(id);
-    const updated = await this.staffUserRepository.update(id, dto);
-
-    return this.toResponseDto(updated);
+    return this.staffUserRepository.update(id, dto);
   }
 
-  async removeStaffUser(id: string): Promise<StaffUserResponseDto> {
+  async removeStaffUser(id: string): Promise<StaffUser> {
     await this.getStaffUserById(id);
-    const deleted = await this.staffUserRepository.softDelete(id);
-
-    return this.toResponseDto(deleted);
+    return this.staffUserRepository.softDelete(id);
   }
 }

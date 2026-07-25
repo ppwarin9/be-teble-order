@@ -9,7 +9,6 @@ import {
   ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
 import { Public } from '@/common/decorators/public.decorator';
 import { PrismaService } from '@/database/prisma.service';
 import { HealthResponseDto } from '@/health/dto/health-response.dto';
@@ -18,9 +17,9 @@ import { HealthResponseDto } from '@/health/dto/health-response.dto';
 @Controller('health')
 export class HealthController {
   constructor(
-    private health: HealthCheckService,
-    private prismaIndicator: PrismaHealthIndicator,
-    private prisma: PrismaService,
+    private readonly health: HealthCheckService,
+    private readonly prismaIndicator: PrismaHealthIndicator,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Public()
@@ -38,8 +37,6 @@ export class HealthController {
       () => this.prismaIndicator.pingCheck('database', this.prisma),
     ]);
 
-    return plainToInstance(HealthResponseDto, result, {
-      excludeExtraneousValues: true,
-    });
+    return new HealthResponseDto(result);
   }
 }

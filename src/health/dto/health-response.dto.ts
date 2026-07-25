@@ -1,3 +1,4 @@
+import { BaseResponseDto } from '@/common/dto/base-response.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
@@ -8,14 +9,14 @@ class HealthIndicatorStatusDto {
 }
 
 @Exclude()
-export class HealthResponseDto {
+export class HealthResponseDto extends BaseResponseDto<HealthResponseDto> {
   @Expose()
   @ApiProperty({
     example: 'ok',
     enum: ['ok', 'error', 'shutting_down'],
     description: 'Overall status of the health check.',
   })
-  status: string;
+  declare status: string;
 
   @Expose()
   @ApiProperty({
@@ -25,7 +26,7 @@ export class HealthResponseDto {
     additionalProperties: true,
     required: false,
   })
-  info?: Record<string, HealthIndicatorStatusDto>;
+  declare info?: Record<string, HealthIndicatorStatusDto | undefined>;
 
   @Expose()
   @ApiProperty({
@@ -35,7 +36,7 @@ export class HealthResponseDto {
     additionalProperties: true,
     required: false,
   })
-  error?: Record<string, HealthIndicatorStatusDto>;
+  declare error?: Record<string, HealthIndicatorStatusDto | undefined>;
 
   @Expose()
   @ApiProperty({
@@ -44,5 +45,5 @@ export class HealthResponseDto {
     type: HealthIndicatorStatusDto,
     additionalProperties: true,
   })
-  details: Record<string, HealthIndicatorStatusDto>;
+  declare details: Record<string, HealthIndicatorStatusDto | undefined>;
 }

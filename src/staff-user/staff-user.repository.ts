@@ -22,7 +22,7 @@ export class StaffUserRepository {
     });
   }
 
-  async findByEmail(email: string): Promise<StaffUserWithRole | null> {
+  async getByEmail(email: string): Promise<StaffUserWithRole | null> {
     return this.prisma.staffUser.findFirst({
       where: {
         email,
@@ -33,7 +33,7 @@ export class StaffUserRepository {
     });
   }
 
-  async findById(id: string): Promise<StaffUser | null> {
+  async getById(id: string): Promise<StaffUser | null> {
     return this.prisma.staffUser.findFirst({
       where: {
         id,
