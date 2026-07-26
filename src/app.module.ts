@@ -15,6 +15,13 @@ import { StoreSettingModule } from './store-setting/store-setting.module';
 import { DiningTableModule } from './dining-table/dining-table.module';
 import { MenuCategoryModule } from './menu-category/menu-category.module';
 import { MenuItemModule } from './menu-item/menu-item.module';
+import { CustomerModule } from './customer/customer.module';
+import { SessionMemberModule } from './session-member/session-member.module';
+import { TableSessionModule } from './table-session/table-session.module';
+import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
+import { BillModule } from './bill/bill.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -39,6 +46,13 @@ import { MenuItemModule } from './menu-item/menu-item.module';
     DiningTableModule,
     MenuCategoryModule,
     MenuItemModule,
+    CustomerModule,
+    SessionMemberModule,
+    TableSessionModule,
+    CartModule,
+    OrderModule,
+    BillModule,
+    DashboardModule,
   ],
   providers: [
     {

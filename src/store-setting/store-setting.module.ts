@@ -8,5 +8,6 @@ import { StoreSettingRepository } from './store-setting.repository';
   imports: [CacheModule.register()],
   providers: [StoreSettingService, StoreSettingRepository],
   controllers: [StoreSettingController],
+  exports: [StoreSettingService],
 })
 export class StoreSettingModule {}

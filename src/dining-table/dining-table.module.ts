@@ -6,5 +6,6 @@ import { DiningTableRepository } from '@/dining-table/dining-table.repository';
 @Module({
   controllers: [DiningTableController],
   providers: [DiningTableService, DiningTableRepository],
+  exports: [DiningTableService, DiningTableRepository],
 })
 export class DiningTableModule {}

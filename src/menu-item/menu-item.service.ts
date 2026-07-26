@@ -21,7 +21,7 @@ export class MenuItemService {
 
     if (existingMenuItem) {
       throw new ConflictException(
-        `รายการชื่อ '${dto.name}' มีอยู่ในระบบแล้วครับ`,
+        `Menu item name '${dto.name}' already exists`,
       );
     }
 
@@ -36,9 +36,16 @@ export class MenuItemService {
     return this.repository.getAll();
   }
 
-  async getById(id: string): Promise<MenuItem> {
-    const menuItem = await this.repository.getById(id);
+  async getAllForCustomer(): Promise<MenuItem[]> {
+    return this.repository.getAllForCustomer();
+  }
 
+  async getById(id: string): Promise<MenuItem> {
+    return this.findByIdOrThrow(id);
+  }
+
+  async getByIdForCustomer(id: string): Promise<MenuItem> {
+    const menuItem = await this.repository.getByIdForCustomer(id);
     if (!menuItem) {
       throw new NotFoundException('Menu item not found');
     }
@@ -46,13 +53,13 @@ export class MenuItemService {
   }
 
   async update(id: string, dto: UpdateMenuItemDto): Promise<MenuItem> {
-    await this.getById(id);
+    await this.findByIdOrThrow(id);
 
     if (dto.name) {
       const existingMenuItem = await this.repository.findByName(dto.name);
       if (existingMenuItem && existingMenuItem.id !== id) {
         throw new ConflictException(
-          `รายการชื่อ '${dto.name}' มีอยู่ในระบบแล้วครับ`,
+          `Menu item name '${dto.name}' already exists`,
         );
       }
     }
@@ -60,10 +67,25 @@ export class MenuItemService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.getById(id);
+    await this.findByIdOrThrow(id);
 
-    // TODO: เช็ค hasActiveTransactions ป้องกันการลบเมนูที่กำลังมีคนสั่ง
+    const hasActiveTransactions =
+      await this.repository.hasActiveTransactions(id);
+    if (hasActiveTransactions) {
+      throw new ConflictException(
+        'Cannot delete this menu item because it is referenced by an active cart or an in-progress order',
+      );
+    }
 
     await this.repository.softDelete(id);
+  }
+
+  private async findByIdOrThrow(id: string): Promise<MenuItem> {
+    const menuItem = await this.repository.getById(id);
+
+    if (!menuItem) {
+      throw new NotFoundException('Menu item not found');
+    }
+    return menuItem;
   }
 }

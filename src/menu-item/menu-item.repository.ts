@@ -37,6 +37,20 @@ export class MenuItemRepository {
     });
   }
 
+  async getAllForCustomer(): Promise<MenuItem[]> {
+    return this.prisma.menuItem.findMany({
+      where: { deletedAt: null, category: { isActive: true } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getByIdForCustomer(id: string) {
+    return this.prisma.menuItem.findFirst({
+      where: { id, deletedAt: null, category: { isActive: true } },
+      include: { category: true },
+    });
+  }
+
   async update(
     id: string,
     data: Prisma.MenuItemUpdateInput | Prisma.MenuItemUncheckedUpdateInput,
@@ -62,11 +76,13 @@ export class MenuItemRepository {
     });
   }
 
-  // async isInUse(id: string): Promise<boolean> {
-  //   const [cartItem, orderItem] = await Promise.all([
-  //     this.prisma.cartItem.findFirst({ where: { menuItemId: id } }),
-  //     this.prisma.orderItem.findFirst({ where: { menuItemId: id } }),
-  //   ]);
-  //   return !!cartItem || !!orderItem;
-  // }
+  async hasActiveTransactions(menuItemId: string): Promise<boolean> {
+    const [cartItem, orderItem] = await Promise.all([
+      this.prisma.cartItem.findFirst({ where: { menuItemId } }),
+      this.prisma.orderItem.findFirst({
+        where: { menuItemId, status: { not: 'SERVED' } },
+      }),
+    ]);
+    return !!cartItem || !!orderItem;
+  }
 }

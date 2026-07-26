@@ -21,11 +21,7 @@ export class RoleService {
   }
 
   async getRoleById(id: string): Promise<Role> {
-    const role = await this.roleRepository.getById(id);
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-    return role;
+    return this.findByIdOrThrow(id);
   }
 
   // Internal lookup used by StaffUserService to validate a roleId — not exposed via a controller.
@@ -34,15 +30,12 @@ export class RoleService {
   }
 
   async updateRole(id: string, dto: UpdateRoleDto): Promise<Role> {
-    await this.getRoleById(id);
+    await this.findByIdOrThrow(id);
     return this.roleRepository.update(id, dto);
   }
 
   async deleteRole(id: string): Promise<void> {
-    const role = await this.roleRepository.getById(id);
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
+    await this.findByIdOrThrow(id);
 
     const hasStaffUsers = await this.roleRepository.hasStaffUsers(id);
     if (hasStaffUsers) {
@@ -52,5 +45,13 @@ export class RoleService {
     }
 
     await this.roleRepository.delete(id);
+  }
+
+  private async findByIdOrThrow(id: string): Promise<Role> {
+    const role = await this.roleRepository.getById(id);
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+    return role;
   }
 }

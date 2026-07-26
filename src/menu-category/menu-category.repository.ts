@@ -18,6 +18,13 @@ export class MenuCategoryRepository {
     });
   }
 
+  async getAllActive(): Promise<MenuCategory[]> {
+    return this.prisma.menuCategory.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
   async getById(id: string): Promise<MenuCategory | null> {
     return this.prisma.menuCategory.findUnique({
       where: { id },
@@ -45,7 +52,7 @@ export class MenuCategoryRepository {
 
   async hasMenuItems(categoryId: string): Promise<boolean> {
     const menuItem = await this.prisma.menuItem.findFirst({
-      where: { categoryId },
+      where: { categoryId, deletedAt: null },
     });
     return !!menuItem;
   }

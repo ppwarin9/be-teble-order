@@ -50,20 +50,14 @@ export class StaffUserService {
   }
 
   async getStaffUserById(id: string): Promise<StaffUser> {
-    const staff = await this.staffUserRepository.getById(id);
-
-    if (!staff || staff.deletedAt !== null) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    return staff;
+    return this.findByIdOrThrow(id);
   }
 
   async updateStaffUser(
     id: string,
     dto: UpdateStaffUserDto,
   ): Promise<StaffUser> {
-    await this.getStaffUserById(id);
+    await this.findByIdOrThrow(id);
 
     if (dto.roleId) {
       const role = await this.roleService.getById(dto.roleId);
@@ -76,7 +70,17 @@ export class StaffUserService {
   }
 
   async removeStaffUser(id: string): Promise<StaffUser> {
-    await this.getStaffUserById(id);
+    await this.findByIdOrThrow(id);
     return this.staffUserRepository.softDelete(id);
+  }
+
+  private async findByIdOrThrow(id: string): Promise<StaffUser> {
+    const staff = await this.staffUserRepository.getById(id);
+
+    if (!staff) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return staff;
   }
 }

@@ -37,7 +37,6 @@ export class StaffUserRepository {
     return this.prisma.staffUser.findFirst({
       where: {
         id,
-        isActive: true,
         deletedAt: null,
       },
     });

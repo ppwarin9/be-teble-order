@@ -17,7 +17,7 @@ export class MenuCategoryService {
 
     if (existingCategory) {
       throw new ConflictException(
-        `หมวดหมู่เมนูชื่อ '${dto.name}' มีอยู่ในระบบแล้วครับ`,
+        `Menu category name '${dto.name}' already exists`,
       );
     }
     return this.repository.create({
@@ -29,23 +29,22 @@ export class MenuCategoryService {
     return this.repository.getAll();
   }
 
-  async getById(id: string): Promise<MenuCategory> {
-    const menuCategory = await this.repository.getById(id);
-    if (!menuCategory) {
-      throw new NotFoundException('Menu category not found');
-    }
+  async getAllActive(): Promise<MenuCategory[]> {
+    return this.repository.getAllActive();
+  }
 
-    return menuCategory;
+  async getById(id: string): Promise<MenuCategory> {
+    return this.findByIdOrThrow(id);
   }
 
   async update(id: string, dto: UpdateMenuCategoryDto): Promise<MenuCategory> {
-    await this.getById(id);
+    await this.findByIdOrThrow(id);
 
     if (dto.name) {
       const existingCategory = await this.repository.findByName(dto.name);
       if (existingCategory && existingCategory.id !== id) {
         throw new ConflictException(
-          `หมวดหมู่เมนูชื่อ '${dto.name}' มีอยู่ในระบบแล้วครับ`,
+          `Menu category name '${dto.name}' already exists`,
         );
       }
     }
@@ -53,14 +52,23 @@ export class MenuCategoryService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.getById(id);
+    await this.findByIdOrThrow(id);
 
     const hasMenuItem = await this.repository.hasMenuItems(id);
     if (hasMenuItem) {
       throw new ConflictException(
-        'Cannot delete this menu category because it has an menu-item',
+        'Cannot delete this menu category because it still has menu items',
       );
     }
     await this.repository.softDelete(id);
+  }
+
+  private async findByIdOrThrow(id: string): Promise<MenuCategory> {
+    const menuCategory = await this.repository.getById(id);
+    if (!menuCategory) {
+      throw new NotFoundException('Menu category not found');
+    }
+
+    return menuCategory;
   }
 }
