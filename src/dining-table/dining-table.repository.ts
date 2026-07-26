@@ -41,8 +41,11 @@ export class DiningTableRepository {
   }
 
   async delete(id: string): Promise<DiningTable> {
-    return this.prisma.diningTable.delete({
+    return this.prisma.diningTable.update({
       where: { id },
+      data: {
+        isActive: false,
+      },
     });
   }
 

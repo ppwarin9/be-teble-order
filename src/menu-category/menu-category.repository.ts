@@ -34,16 +34,25 @@ export class MenuCategoryRepository {
     });
   }
 
-  async delete(id: string): Promise<MenuCategory> {
-    return this.prisma.menuCategory.delete({
+  async softDelete(id: string): Promise<MenuCategory> {
+    return this.prisma.menuCategory.update({
       where: { id },
+      data: {
+        isActive: false,
+      },
     });
   }
 
   async hasMenuItems(categoryId: string): Promise<boolean> {
     const menuItem = await this.prisma.menuItem.findFirst({
-      where: { categoryId, deletedAt: null },
+      where: { categoryId },
     });
     return !!menuItem;
+  }
+
+  async findByName(name: string): Promise<MenuCategory | null> {
+    return this.prisma.menuCategory.findFirst({
+      where: { name },
+    });
   }
 }
