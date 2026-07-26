@@ -52,4 +52,18 @@ export class MenuItemRepository {
       },
     });
   }
+
+  async findByName(name: string): Promise<MenuItem | null> {
+    return this.prisma.menuItem.findFirst({
+      where: { name, deletedAt: null },
+    });
+  }
+
+  // async isInUse(id: string): Promise<boolean> {
+  //   const [cartItem, orderItem] = await Promise.all([
+  //     this.prisma.cartItem.findFirst({ where: { menuItemId: id } }),
+  //     this.prisma.orderItem.findFirst({ where: { menuItemId: id } }),
+  //   ]);
+  //   return !!cartItem || !!orderItem;
+  // }
 }
