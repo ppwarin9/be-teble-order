@@ -21,9 +21,12 @@ export class MenuItemRepository {
     });
   }
 
-  async getById(id: string): Promise<MenuItem | null> {
+  async getById(id: string) {
     return this.prisma.menuItem.findFirst({
       where: { id, deletedAt: null },
+      include: {
+        category: true,
+      },
     });
   }
 
