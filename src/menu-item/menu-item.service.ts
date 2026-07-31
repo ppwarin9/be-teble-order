@@ -2,7 +2,7 @@ import { MenuItem } from '@/database/generated/prisma/client';
 import { MenuCategoryService } from '@/menu-category/menu-category.service';
 import { CreateMenuItemDto } from '@/menu-item/dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from '@/menu-item/dto/update-menu-item.dto';
-import { MenuItemRepository } from '@/menu-item/menu-item.repository';
+import { MenuItemRepositoryInterface } from '@/menu-item/menu-item.repository.interface';
 import {
   ConflictException,
   Injectable,
@@ -12,7 +12,7 @@ import {
 @Injectable()
 export class MenuItemService {
   constructor(
-    private readonly repository: MenuItemRepository,
+    private readonly repository: MenuItemRepositoryInterface,
     private readonly menuCategoryService: MenuCategoryService,
   ) {}
 

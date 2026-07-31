@@ -1,18 +1,15 @@
+import {
+  ActiveSessionRow,
+  DashboardRepositoryInterface,
+} from '@/dashboard/dashboard.repository.interface';
 import { PrismaService } from '@/database/prisma.service';
 import { Injectable } from '@nestjs/common';
 
-export type ActiveSessionRow = {
-  tableSessionId: string;
-  diningTableId: string;
-  tableNumber: string;
-  openedAt: Date;
-  memberCount: number;
-  pendingItemCount: number;
-};
-
 @Injectable()
-export class DashboardRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class DashboardRepository extends DashboardRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async getDailySales(
     start: Date,

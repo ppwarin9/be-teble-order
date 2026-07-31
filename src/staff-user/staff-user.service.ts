@@ -9,14 +9,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  StaffUserRepository,
+  StaffUserRepositoryInterface,
   StaffUserWithRole,
-} from './staff-user.repository';
+} from './staff-user.repository.interface';
 
 @Injectable()
 export class StaffUserService {
   constructor(
-    private readonly staffUserRepository: StaffUserRepository,
+    private readonly staffUserRepository: StaffUserRepositoryInterface,
     private readonly bcryptService: BcryptService,
     private readonly roleService: RoleService,
   ) {}

@@ -41,8 +41,8 @@ export class AuthController {
       loginDto.email,
       loginDto.password,
     );
+    console.log('authContrller');
     const accessToken = this.authService.signAccessToken(staff);
-
     return new AuthLoginResponseDto({
       accessToken,
       user: new StaffUserResponseDto(staff),

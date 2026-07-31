@@ -1,9 +1,9 @@
 import { AuthenticatedSessionMember } from '@/auth/types/session.type';
-import { BillRepository } from '@/bill/bill.repository';
-import { BillShareRepository } from '@/bill/bill-share.repository';
+import { BillRepositoryInterface } from '@/bill/bill.repository.interface';
+import { BillShareRepositoryInterface } from '@/bill/bill-share.repository.interface';
 import { CreatePaymentDto } from '@/bill/dto/create-payment.dto';
 import { Payment } from '@/database/generated/prisma/client';
-import { PaymentRepository } from '@/bill/payment.repository';
+import { PaymentRepositoryInterface } from '@/bill/payment.repository.interface';
 import {
   ConflictException,
   ForbiddenException,
@@ -14,9 +14,9 @@ import {
 @Injectable()
 export class PaymentService {
   constructor(
-    private readonly paymentRepository: PaymentRepository,
-    private readonly billShareRepository: BillShareRepository,
-    private readonly billRepository: BillRepository,
+    private readonly paymentRepository: PaymentRepositoryInterface,
+    private readonly billShareRepository: BillShareRepositoryInterface,
+    private readonly billRepository: BillRepositoryInterface,
   ) {}
 
   async createPayment(

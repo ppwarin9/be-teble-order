@@ -1,6 +1,6 @@
 import { StoreSetting } from '@/database/generated/prisma/client';
 import { UpdateStoreSettingDto } from '@/store-setting/dto/update-store-setting.dto';
-import { StoreSettingRepository } from '@/store-setting/store-setting.repository';
+import { StoreSettingRepositoryInterface } from '@/store-setting/store-setting.repository.interface';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -9,7 +9,7 @@ export class StoreSettingService {
   private readonly CACHE_KEY = 'STORE_SETTING_CACHE';
 
   constructor(
-    private readonly repository: StoreSettingRepository,
+    private readonly repository: StoreSettingRepositoryInterface,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 

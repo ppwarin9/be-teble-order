@@ -1,12 +1,16 @@
-import { BillShare, Payment, Prisma } from '@/database/generated/prisma/client';
+import { Payment, Prisma } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  PaymentRepositoryInterface,
+  PaymentWithBillShare,
+} from '@/bill/payment.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type PaymentWithBillShare = Payment & { billShare: BillShare };
-
 @Injectable()
-export class PaymentRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class PaymentRepository extends PaymentRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async create(data: Prisma.PaymentUncheckedCreateInput): Promise<Payment> {
     return this.prisma.payment.create({ data });

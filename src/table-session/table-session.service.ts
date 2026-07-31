@@ -1,10 +1,13 @@
-import { CustomerRepository } from '@/customer/customer.repository';
-import { DiningTableRepository } from '@/dining-table/dining-table.repository';
+import { CustomerRepositoryInterface } from '@/customer/customer.repository.interface';
+import { DiningTableRepositoryInterface } from '@/dining-table/dining-table.repository.interface';
 import { TableSession } from '@/database/generated/prisma/client';
 import { SessionStatus } from '@/database/generated/prisma/enums';
-import { SessionMemberRepository } from '@/session-member/session-member.repository';
+import {
+  SessionMemberRepositoryInterface,
+  SessionMemberWithCustomer,
+} from '@/session-member/session-member.repository.interface';
 import { JoinTableSessionDto } from '@/table-session/dto/join-table-session.dto';
-import { TableSessionRepository } from '@/table-session/table-session.repository';
+import { TableSessionRepositoryInterface } from '@/table-session/table-session.repository.interface';
 import {
   ConflictException,
   Injectable,
@@ -20,10 +23,10 @@ export type JoinTableSessionResult = {
 @Injectable()
 export class TableSessionService {
   constructor(
-    private readonly repository: TableSessionRepository,
-    private readonly diningTableRepository: DiningTableRepository,
-    private readonly customerRepository: CustomerRepository,
-    private readonly sessionMemberRepository: SessionMemberRepository,
+    private readonly repository: TableSessionRepositoryInterface,
+    private readonly diningTableRepository: DiningTableRepositoryInterface,
+    private readonly customerRepository: CustomerRepositoryInterface,
+    private readonly sessionMemberRepository: SessionMemberRepositoryInterface,
   ) {}
 
   async joinByQrToken(
@@ -33,11 +36,9 @@ export class TableSessionService {
     if (!table || !table.isActive) {
       throw new NotFoundException('Dining table not found');
     }
-
-    let tableSession = await this.repository.findOpenByDiningTableId(table.id);
-    if (!tableSession) {
-      tableSession = await this.repository.create(table.id);
-    }
+    const tableSession = await this.repository.findOrCreateOpenSession(
+      table.id,
+    );
 
     const customer = await this.customerRepository.upsertByLineUserId({
       lineUserId: dto.lineUserId,
@@ -49,6 +50,7 @@ export class TableSessionService {
       await this.sessionMemberRepository.findOpenMembershipByCustomerId(
         customer.id,
       );
+
     if (
       existingOpenMembership &&
       existingOpenMembership.tableSessionId !== tableSession.id
@@ -84,6 +86,13 @@ export class TableSessionService {
   async close(id: string): Promise<TableSession> {
     await this.findByIdOrThrow(id);
     return this.repository.close(id);
+  }
+
+  async getMembers(
+    tableSessionId: string,
+  ): Promise<SessionMemberWithCustomer[]> {
+    await this.findByIdOrThrow(tableSessionId);
+    return this.sessionMemberRepository.getAllByTableSessionId(tableSessionId);
   }
 
   private async findByIdOrThrow(id: string): Promise<TableSession> {

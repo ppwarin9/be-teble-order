@@ -1,12 +1,26 @@
+import { CurrentSessionMember } from '@/auth/decorators/current-session-member.decorator';
+import { SessionTokenGuard } from '@/auth/guards/session-token.guard';
+import { type AuthenticatedSessionMember } from '@/auth/types/session.type';
 import { Public } from '@/common/decorators/public.decorator';
+import { SessionMemberResponseDto } from '@/session-member/dto/session-member-response.dto';
 import { JoinSessionResponseDto } from '@/table-session/dto/join-session-response.dto';
 import { JoinTableSessionDto } from '@/table-session/dto/join-table-session.dto';
 import { TableSessionService } from '@/table-session/table-session.service';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -38,5 +52,24 @@ export class CustomerTableSessionController {
   ): Promise<JoinSessionResponseDto> {
     const result = await this.tableSessionService.joinByQrToken(dto);
     return new JoinSessionResponseDto(result);
+  }
+
+  @Get('members')
+  @ApiBearerAuth()
+  @UseGuards(SessionTokenGuard)
+  @ApiOperation({
+    summary: "Get all members of the customer's current table session",
+  })
+  @ApiOkResponse({
+    description: 'List of session members.',
+    type: [SessionMemberResponseDto],
+  })
+  async getMembers(
+    @CurrentSessionMember() sessionMember: AuthenticatedSessionMember,
+  ): Promise<SessionMemberResponseDto[]> {
+    const members = await this.tableSessionService.getMembers(
+      sessionMember.tableSessionId,
+    );
+    return members.map((member) => new SessionMemberResponseDto(member));
   }
 }

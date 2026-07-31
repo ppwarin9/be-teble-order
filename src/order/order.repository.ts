@@ -1,35 +1,19 @@
-import {
-  DiningTable,
-  OrderItem,
-  OrderRound,
-  Prisma,
-  TableSession,
-} from '@/database/generated/prisma/client';
+import { OrderItem, Prisma } from '@/database/generated/prisma/client';
 import { OrderItemStatus } from '@/database/generated/prisma/enums';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  NewOrderItemInput,
+  OrderItemWithContext,
+  OrderRepositoryInterface,
+  OrderRoundWithItems,
+} from '@/order/order.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type OrderRoundWithItems = OrderRound & { orderItems: OrderItem[] };
-
-export type OrderItemWithContext = OrderItem & {
-  orderRound: OrderRound & {
-    tableSession: TableSession & { diningTable: DiningTable };
-  };
-};
-
-export type NewOrderItemInput = {
-  menuItemId: string;
-  addedBy: string;
-  quantity: number;
-  unitPriceSnapshot: number;
-  nameSnapshot: string;
-  note: string;
-  estimatedMinutes: number;
-};
-
 @Injectable()
-export class OrderRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class OrderRepository extends OrderRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async getNextRoundNumber(tableSessionId: string): Promise<number> {
     const count = await this.prisma.orderRound.count({

@@ -5,9 +5,9 @@ import { OrderItemStatus } from '@/database/generated/prisma/enums';
 import {
   NewOrderItemInput,
   OrderItemWithContext,
-  OrderRepository,
+  OrderRepositoryInterface,
   OrderRoundWithItems,
-} from '@/order/order.repository';
+} from '@/order/order.repository.interface';
 import {
   BadRequestException,
   Injectable,
@@ -20,7 +20,7 @@ const DEFAULT_QUEUE_STATUSES: OrderItemStatus[] = ['PENDING', 'COOKING'];
 @Injectable()
 export class OrderService {
   constructor(
-    private readonly repository: OrderRepository,
+    private readonly repository: OrderRepositoryInterface,
     private readonly cartService: CartService,
   ) {}
 

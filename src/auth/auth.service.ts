@@ -1,4 +1,4 @@
-import { StaffUserWithRole } from '@/staff-user/staff-user.repository';
+import { StaffUserWithRole } from '@/staff-user/staff-user.repository.interface';
 import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
 import { StaffUserService } from '@/staff-user/staff-user.service';
 import { type JwtPayload } from '@/auth/types/jwt-payload.type';
@@ -45,6 +45,7 @@ export class AuthService {
       role: staff.role.code,
     };
 
+    console.log('signAccessToken ');
     return this.jwtService.sign(payload);
   }
 }

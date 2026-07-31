@@ -1,5 +1,5 @@
 import { DiningTable } from '@/database/generated/prisma/client';
-import { DiningTableRepository } from '@/dining-table/dining-table.repository';
+import { DiningTableRepositoryInterface } from '@/dining-table/dining-table.repository.interface';
 import { CreateDiningTableDto } from '@/dining-table/dto/create-dining-table.dto';
 import { UpdateDiningTableDto } from '@/dining-table/dto/update-dining-table.dto';
 import {
@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class DiningTableService {
-  constructor(private readonly repository: DiningTableRepository) {}
+  constructor(private readonly repository: DiningTableRepositoryInterface) {}
 
   async create(dto: CreateDiningTableDto): Promise<DiningTable> {
     const qrToken = crypto.randomUUID();

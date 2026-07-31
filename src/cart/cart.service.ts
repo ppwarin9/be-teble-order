@@ -1,9 +1,9 @@
 import { AuthenticatedSessionMember } from '@/auth/types/session.type';
 import {
   CartItemWithMenuItem,
-  CartRepository,
+  CartRepositoryInterface,
   CartWithItems,
-} from '@/cart/cart.repository';
+} from '@/cart/cart.repository.interface';
 import { AddCartItemDto } from '@/cart/dto/add-cart-item.dto';
 import { UpdateCartItemDto } from '@/cart/dto/update-cart-item.dto';
 import { MenuItemService } from '@/menu-item/menu-item.service';
@@ -17,7 +17,7 @@ import {
 @Injectable()
 export class CartService {
   constructor(
-    private readonly repository: CartRepository,
+    private readonly repository: CartRepositoryInterface,
     private readonly menuItemService: MenuItemService,
   ) {}
 

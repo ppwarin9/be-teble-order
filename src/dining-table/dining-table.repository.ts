@@ -1,10 +1,13 @@
 import { DiningTable, Prisma } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import { DiningTableRepositoryInterface } from '@/dining-table/dining-table.repository.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class DiningTableRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class DiningTableRepository extends DiningTableRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async getAll(): Promise<DiningTable[]> {
     return this.prisma.diningTable.findMany({

@@ -3,14 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { RoleRepository } from './role.repository';
+import { RoleRepositoryInterface } from './role.repository.interface';
 import { Role } from '@/database/generated/prisma/client';
 import { CreateRoleDto } from '@/role/dto/create-role.dto';
 import { UpdateRoleDto } from '@/role/dto/update-role.dto';
 
 @Injectable()
 export class RoleService {
-  constructor(private readonly roleRepository: RoleRepository) {}
+  constructor(private readonly roleRepository: RoleRepositoryInterface) {}
 
   async createRole(dto: CreateRoleDto): Promise<Role> {
     return this.roleRepository.create(dto);

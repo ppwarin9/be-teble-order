@@ -1,8 +1,14 @@
-import { Module } from '@nestjs/common';
 import { SessionMemberRepository } from '@/session-member/session-member.repository';
+import { SessionMemberRepositoryInterface } from '@/session-member/session-member.repository.interface';
+import { Module } from '@nestjs/common';
 
 @Module({
-  providers: [SessionMemberRepository],
-  exports: [SessionMemberRepository],
+  providers: [
+    {
+      provide: SessionMemberRepositoryInterface,
+      useClass: SessionMemberRepository,
+    },
+  ],
+  exports: [SessionMemberRepositoryInterface],
 })
 export class SessionMemberModule {}

@@ -1,5 +1,5 @@
 import { AuthenticatedSessionMember } from '@/auth/types/session.type';
-import { SessionMemberRepository } from '@/session-member/session-member.repository';
+import { SessionMemberRepositoryInterface } from '@/session-member/session-member.repository.interface';
 import {
   CanActivate,
   ExecutionContext,
@@ -15,7 +15,7 @@ type RequestWithSessionMember = Request & {
 @Injectable()
 export class SessionTokenGuard implements CanActivate {
   constructor(
-    private readonly sessionMemberRepository: SessionMemberRepository,
+    private readonly sessionMemberRepository: SessionMemberRepositoryInterface,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { Prisma, Role } from '@/database/generated/prisma/client';
+import { RoleRepositoryInterface } from '@/role/role.repository.interface';
 
 @Injectable()
-export class RoleRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class RoleRepository extends RoleRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async create(
     data: Prisma.RoleCreateInput | Prisma.RoleUncheckedCreateInput,

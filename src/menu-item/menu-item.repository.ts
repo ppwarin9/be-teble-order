@@ -1,10 +1,16 @@
 import { MenuItem, Prisma } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  MenuItemRepositoryInterface,
+  MenuItemWithCategory,
+} from '@/menu-item/menu-item.repository.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class MenuItemRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class MenuItemRepository extends MenuItemRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async create(
     data: Prisma.MenuItemCreateInput | Prisma.MenuItemUncheckedCreateInput,
@@ -21,7 +27,7 @@ export class MenuItemRepository {
     });
   }
 
-  async getById(id: string) {
+  async getById(id: string): Promise<MenuItemWithCategory | null> {
     return this.prisma.menuItem.findFirst({
       where: { id, deletedAt: null },
       include: {
@@ -44,7 +50,7 @@ export class MenuItemRepository {
     });
   }
 
-  async getByIdForCustomer(id: string) {
+  async getByIdForCustomer(id: string): Promise<MenuItemWithCategory | null> {
     return this.prisma.menuItem.findFirst({
       where: { id, deletedAt: null, category: { isActive: true } },
       include: { category: true },

@@ -1,7 +1,7 @@
 import {
   ActiveSessionRow,
-  DashboardRepository,
-} from '@/dashboard/dashboard.repository';
+  DashboardRepositoryInterface,
+} from '@/dashboard/dashboard.repository.interface';
 import { Injectable } from '@nestjs/common';
 
 export type DailySales = {
@@ -13,7 +13,7 @@ export type DailySales = {
 
 @Injectable()
 export class DashboardService {
-  constructor(private readonly repository: DashboardRepository) {}
+  constructor(private readonly repository: DashboardRepositoryInterface) {}
 
   async getDailySales(dateInput?: string): Promise<DailySales> {
     const date = dateInput ? new Date(dateInput) : new Date();

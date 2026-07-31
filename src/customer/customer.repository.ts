@@ -1,16 +1,16 @@
 import { Customer } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  CustomerRepositoryInterface,
+  UpsertCustomerData,
+} from '@/customer/customer.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type UpsertCustomerData = {
-  lineUserId: string;
-  displayName: string;
-  pictureUrl: string;
-};
-
 @Injectable()
-export class CustomerRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class CustomerRepository extends CustomerRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async upsertByLineUserId(data: UpsertCustomerData): Promise<Customer> {
     return this.prisma.customer.upsert({

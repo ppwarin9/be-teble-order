@@ -1,11 +1,14 @@
-import { TableSession } from '@/database/generated/prisma/client';
+import { Prisma, TableSession } from '@/database/generated/prisma/client';
 import { SessionStatus } from '@/database/generated/prisma/enums';
 import { PrismaService } from '@/database/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { TableSessionRepositoryInterface } from '@/table-session/table-session.repository.interface';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 @Injectable()
-export class TableSessionRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class TableSessionRepository extends TableSessionRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async findOpenByDiningTableId(
     diningTableId: string,
@@ -37,5 +40,31 @@ export class TableSessionRepository {
       where: { id },
       data: { status: 'CLOSED', closedAt: new Date() },
     });
+  }
+
+  async findOrCreateOpenSession(diningTableId: string): Promise<TableSession> {
+    let session = await this.findOpenByDiningTableId(diningTableId);
+
+    if (!session) {
+      try {
+        session = await this.create(diningTableId);
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002'
+        ) {
+          session = await this.findOpenByDiningTableId(diningTableId);
+          if (!session) {
+            throw new InternalServerErrorException(
+              'Unable to join the table session at this time.',
+            );
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    return session;
   }
 }

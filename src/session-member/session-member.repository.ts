@@ -1,18 +1,17 @@
-import {
-  Prisma,
-  SessionMember,
-  TableSession,
-} from '@/database/generated/prisma/client';
+import { Prisma, SessionMember } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  SessionMemberRepositoryInterface,
+  SessionMemberWithCustomer,
+  SessionMemberWithTableSession,
+} from '@/session-member/session-member.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type SessionMemberWithTableSession = SessionMember & {
-  tableSession: TableSession;
-};
-
 @Injectable()
-export class SessionMemberRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class SessionMemberRepository extends SessionMemberRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async findByToken(
     sessionToken: string,
@@ -53,9 +52,10 @@ export class SessionMemberRepository {
 
   async getAllByTableSessionId(
     tableSessionId: string,
-  ): Promise<SessionMember[]> {
+  ): Promise<SessionMemberWithCustomer[]> {
     return this.prisma.sessionMember.findMany({
       where: { tableSessionId },
+      include: { customer: true },
       orderBy: { joinedAt: 'asc' },
     });
   }

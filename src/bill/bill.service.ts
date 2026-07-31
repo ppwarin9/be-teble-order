@@ -1,11 +1,11 @@
 import { AuthenticatedSessionMember } from '@/auth/types/session.type';
 import {
-  BillRepository,
+  BillRepositoryInterface,
   BillWithShares,
   NewBillShareInput,
-} from '@/bill/bill.repository';
+} from '@/bill/bill.repository.interface';
 import { GenerateBillDto } from '@/bill/dto/generate-bill.dto';
-import { SessionMemberRepository } from '@/session-member/session-member.repository';
+import { SessionMemberRepositoryInterface } from '@/session-member/session-member.repository.interface';
 import { StoreSettingService } from '@/store-setting/store-setting.service';
 import {
   BadRequestException,
@@ -17,8 +17,8 @@ import {
 @Injectable()
 export class BillService {
   constructor(
-    private readonly repository: BillRepository,
-    private readonly sessionMemberRepository: SessionMemberRepository,
+    private readonly repository: BillRepositoryInterface,
+    private readonly sessionMemberRepository: SessionMemberRepositoryInterface,
     private readonly storeSettingService: StoreSettingService,
   ) {}
 

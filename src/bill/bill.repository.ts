@@ -1,30 +1,18 @@
-import { Bill, BillShare, Prisma } from '@/database/generated/prisma/client';
+import { Bill } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  BillRepositoryInterface,
+  BillWithShares,
+  NewBillInput,
+  NewBillShareInput,
+} from '@/bill/bill.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type BillWithShares = Bill & { billShares: BillShare[] };
-
-export type NewBillShareInput = {
-  sessionMemberId: string;
-  amountDue: number;
-};
-
-export type NewBillInput = {
-  tableSessionId: string;
-  splitMethod: Prisma.BillCreateInput['splitMethod'];
-  subtotal: number;
-  discountAmount: number;
-  serviceChargeRateSnapshot: number;
-  serviceChargeAmount: number;
-  vatRateSnapShot: number;
-  vatAmount: number;
-  grandTotal: number;
-  currencySnapShot: string;
-};
-
 @Injectable()
-export class BillRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class BillRepository extends BillRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async getUnsettledBillForSession(
     tableSessionId: string,

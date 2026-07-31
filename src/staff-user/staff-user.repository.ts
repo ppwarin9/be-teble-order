@@ -1,12 +1,16 @@
-import { Prisma, Role, StaffUser } from '@/database/generated/prisma/client';
+import { Prisma, StaffUser } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  StaffUserRepositoryInterface,
+  StaffUserWithRole,
+} from '@/staff-user/staff-user.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type StaffUserWithRole = StaffUser & { role: Role };
-
 @Injectable()
-export class StaffUserRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class StaffUserRepository extends StaffUserRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async create(
     data: Prisma.StaffUserUncheckedCreateInput | Prisma.StaffUserCreateInput,

@@ -1,10 +1,13 @@
 import { MenuCategory, Prisma } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import { MenuCategoryRepositoryInterface } from '@/menu-category/menu-category.repository.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class MenuCategoryRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class MenuCategoryRepository extends MenuCategoryRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async create(data: Prisma.MenuCategoryCreateInput): Promise<MenuCategory> {
     return this.prisma.menuCategory.create({

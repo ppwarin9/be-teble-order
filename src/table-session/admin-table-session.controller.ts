@@ -1,5 +1,6 @@
 import { Roles } from '@/common/decorators/roles.decorator';
 import { SessionStatus } from '@/database/generated/prisma/enums';
+import { SessionMemberResponseDto } from '@/session-member/dto/session-member-response.dto';
 import { TableSessionResponseDto } from '@/table-session/dto/table-session-response.dto';
 import { TableSessionService } from '@/table-session/table-session.service';
 import {
@@ -53,6 +54,21 @@ export class AdminTableSessionController {
   ): Promise<TableSessionResponseDto> {
     const session = await this.tableSessionService.getOne(id);
     return new TableSessionResponseDto(session);
+  }
+
+  @Get(':id/members')
+  @Roles('ADMIN', 'STAFF')
+  @ApiOperation({ summary: 'Get all members of a table session' })
+  @ApiOkResponse({
+    description: 'List of session members.',
+    type: [SessionMemberResponseDto],
+  })
+  @ApiNotFoundResponse({ description: 'Table session not found.' })
+  async getMembers(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<SessionMemberResponseDto[]> {
+    const members = await this.tableSessionService.getMembers(id);
+    return members.map((member) => new SessionMemberResponseDto(member));
   }
 
   @Patch(':id/close')

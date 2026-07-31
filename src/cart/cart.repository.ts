@@ -1,19 +1,18 @@
-import {
-  Cart,
-  CartItem,
-  MenuItem,
-  Prisma,
-} from '@/database/generated/prisma/client';
+import { Cart, CartItem, Prisma } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import {
+  CartItemWithCart,
+  CartItemWithMenuItem,
+  CartRepositoryInterface,
+  CartWithItems,
+} from '@/cart/cart.repository.interface';
 import { Injectable } from '@nestjs/common';
 
-export type CartItemWithMenuItem = CartItem & { menuItem: MenuItem };
-export type CartWithItems = Cart & { cartItems: CartItemWithMenuItem[] };
-export type CartItemWithCart = CartItem & { cart: Cart };
-
 @Injectable()
-export class CartRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class CartRepository extends CartRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async findByTableSessionId(
     tableSessionId: string,

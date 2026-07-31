@@ -1,10 +1,13 @@
 import { Prisma, StoreSetting } from '@/database/generated/prisma/client';
 import { PrismaService } from '@/database/prisma.service';
+import { StoreSettingRepositoryInterface } from '@/store-setting/store-setting.repository.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class StoreSettingRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class StoreSettingRepository extends StoreSettingRepositoryInterface {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
 
   async getSingleton(): Promise<StoreSetting | null> {
     return this.prisma.storeSetting.findFirst();

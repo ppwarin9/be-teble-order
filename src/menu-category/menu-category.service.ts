@@ -1,7 +1,7 @@
 import { MenuCategory } from '@/database/generated/prisma/client';
 import { CreateMenuCategoryDto } from '@/menu-category/dto/create-menu-category.dto';
 import { UpdateMenuCategoryDto } from '@/menu-category/dto/update-menu-category.dto';
-import { MenuCategoryRepository } from '@/menu-category/menu-category.repository';
+import { MenuCategoryRepositoryInterface } from '@/menu-category/menu-category.repository.interface';
 import {
   ConflictException,
   Injectable,
@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class MenuCategoryService {
-  constructor(private readonly repository: MenuCategoryRepository) {}
+  constructor(private readonly repository: MenuCategoryRepositoryInterface) {}
 
   async create(dto: CreateMenuCategoryDto): Promise<MenuCategory> {
     const existingCategory = await this.repository.findByName(dto.name);
