@@ -52,11 +52,6 @@ enum PaymentStatus {
   FAILED
 }
 
-enum DiscountType {
-  PERCENT
-  FIXED
-}
-
 enum RoleCode {
   SUPERADMIN
   ADMIN
@@ -188,20 +183,6 @@ model MenuItem {
 
 //   @@id([menuItemId, modifierGroupId])
 //   @@map("menu_item_modifier_group")
-// }
-
-// model Promotion {
-//   id            String       @id @default(uuid())
-//   name          String
-//   discountType  DiscountType @map("discount_type")
-//   discountValue Int          @map("discount_value")
-//   startsAt      DateTime     @map("starts_at")
-//   endsAt        DateTime     @map("ends_at")
-//   isActive      Boolean      @default(true) @map("is_active")
-
-//   billDiscounts BillDiscount[]
-
-//   @@map("promotion")
 // }
 
 model Customer {
@@ -349,21 +330,10 @@ model Bill {
   issuer                    StaffUser?     @relation("BillIssuedBy", fields: [issuedBy], references: [id], onDelete: SetNull)
   issuedAt                  DateTime       @default(now()) @map("issued_at")
   settledAt                 DateTime?      @map("settled_at")
-  billDiscounts             BillDiscount[]
   billShares                BillShare[]
 
   @@index([tableSessionId, status])
   @@map("bill")
-}
-
-model BillDiscount {
-  id             String @id @default(ulid())
-  billId         String @map("bill_id")
-  bill           Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
-  amountSnapshot Int    @map("amount_snapshot")
-
-  @@index([billId])
-  @@map("bill_discount")
 }
 
 model BillShare {
