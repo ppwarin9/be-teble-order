@@ -87,8 +87,11 @@ export class CartService {
     );
   }
 
-  async clearCart(cartId: string): Promise<void> {
+  async clearCart(cartId: string, tableSessionId: string): Promise<void> {
     await this.repository.deleteAllCartItems(cartId);
+    this.realtimeGateway.emitToTableSession(tableSessionId, 'cart:updated', {
+      cartId,
+    });
   }
 
   private async getOrCreateCart(

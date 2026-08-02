@@ -55,7 +55,7 @@ export class OrderService {
       items,
     );
 
-    await this.cartService.clearCart(cart.id);
+    await this.cartService.clearCart(cart.id, sessionMember.tableSessionId);
 
     this.realtimeGateway.emitToTableSession(
       sessionMember.tableSessionId,
