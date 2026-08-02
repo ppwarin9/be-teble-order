@@ -36,8 +36,8 @@ export class MenuItemService {
     return this.repository.getAll();
   }
 
-  async getAllForCustomer(): Promise<MenuItem[]> {
-    return this.repository.getAllForCustomer();
+  async getAllForCustomer(categoryId?: string): Promise<MenuItem[]> {
+    return this.repository.getAllForCustomer(categoryId);
   }
 
   async getById(id: string): Promise<MenuItem> {

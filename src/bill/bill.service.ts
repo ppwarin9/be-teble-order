@@ -5,6 +5,7 @@ import {
   NewBillShareInput,
 } from '@/bill/bill.repository.interface';
 import { GenerateBillDto } from '@/bill/dto/generate-bill.dto';
+import { RealtimeGateway } from '@/realtime/realtime.gateway';
 import { SessionMemberRepositoryInterface } from '@/session-member/session-member.repository.interface';
 import { StoreSettingService } from '@/store-setting/store-setting.service';
 import {
@@ -20,6 +21,7 @@ export class BillService {
     private readonly repository: BillRepositoryInterface,
     private readonly sessionMemberRepository: SessionMemberRepositoryInterface,
     private readonly storeSettingService: StoreSettingService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async generateBill(
@@ -68,7 +70,7 @@ export class BillService {
       grandTotal,
     );
 
-    return this.repository.createBillWithShares(
+    const bill = await this.repository.createBillWithShares(
       {
         tableSessionId,
         splitMethod: dto.splitMethod,
@@ -83,12 +85,29 @@ export class BillService {
       },
       shares,
     );
+
+    this.realtimeGateway.emitToTableSession(tableSessionId, 'bill:issued', {
+      billId: bill.id,
+    });
+
+    return bill;
   }
 
   async getBillsForSession(
     sessionMember: AuthenticatedSessionMember,
   ): Promise<BillWithShares[]> {
     return this.repository.getAllByTableSessionId(sessionMember.tableSessionId);
+  }
+
+  async getForAdmin(tableSessionId: string): Promise<BillWithShares> {
+    const [latest] =
+      await this.repository.getAllByTableSessionId(tableSessionId);
+    if (!latest) {
+      throw new NotFoundException(
+        'No bill has been issued for this table session yet',
+      );
+    }
+    return latest;
   }
 
   private async buildShares(

@@ -1,3 +1,9 @@
+// Must run before AppModule (and anything it transitively imports, e.g.
+// RealtimeGateway's `@WebSocketGateway({ cors: { origin: process.env.CORS_ORIGIN } })`
+// decorator) is required — decorator arguments evaluate at class-definition time,
+// which happens during module resolution, before ConfigModule.forRoot() would
+// otherwise populate process.env.
+import 'dotenv/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import {

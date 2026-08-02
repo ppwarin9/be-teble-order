@@ -2,12 +2,14 @@ import { CustomerRepositoryInterface } from '@/customer/customer.repository.inte
 import { DiningTableRepositoryInterface } from '@/dining-table/dining-table.repository.interface';
 import { TableSession } from '@/database/generated/prisma/client';
 import { SessionStatus } from '@/database/generated/prisma/enums';
+import { LineAuthService } from '@/infrastructure/line/line-auth.service';
 import {
   SessionMemberRepositoryInterface,
   SessionMemberWithCustomer,
 } from '@/session-member/session-member.repository.interface';
 import { JoinTableSessionDto } from '@/table-session/dto/join-table-session.dto';
 import { TableSessionRepositoryInterface } from '@/table-session/table-session.repository.interface';
+import { RealtimeGateway } from '@/realtime/realtime.gateway';
 import {
   ConflictException,
   Injectable,
@@ -18,6 +20,7 @@ export type JoinTableSessionResult = {
   sessionToken: string;
   sessionMemberId: string;
   tableSession: TableSession;
+  tableNumber: string;
 };
 
 @Injectable()
@@ -27,6 +30,8 @@ export class TableSessionService {
     private readonly diningTableRepository: DiningTableRepositoryInterface,
     private readonly customerRepository: CustomerRepositoryInterface,
     private readonly sessionMemberRepository: SessionMemberRepositoryInterface,
+    private readonly realtimeGateway: RealtimeGateway,
+    private readonly lineAuthService: LineAuthService,
   ) {}
 
   async joinByQrToken(
@@ -36,12 +41,20 @@ export class TableSessionService {
     if (!table || !table.isActive) {
       throw new NotFoundException('Dining table not found');
     }
+
+    // lineUserId comes only from the verified token, never from the request
+    // body, so a customer's identity can't be spoofed or their live session
+    // hijacked by whoever guesses/knows it.
+    const { lineUserId } = await this.lineAuthService.verifyIdToken(
+      dto.idToken,
+    );
+
     const tableSession = await this.repository.findOrCreateOpenSession(
       table.id,
     );
 
     const customer = await this.customerRepository.upsertByLineUserId({
-      lineUserId: dto.lineUserId,
+      lineUserId,
       displayName: dto.displayName,
       pictureUrl: dto.pictureUrl,
     });
@@ -72,6 +85,7 @@ export class TableSessionService {
       sessionToken: member.sessionToken,
       sessionMemberId: member.id,
       tableSession,
+      tableNumber: table.tableNumber,
     };
   }
 
@@ -85,7 +99,12 @@ export class TableSessionService {
 
   async close(id: string): Promise<TableSession> {
     await this.findByIdOrThrow(id);
-    return this.repository.close(id);
+    const session = await this.repository.close(id);
+    this.realtimeGateway.emitToTableSession(id, 'session:closed', {
+      tableSessionId: id,
+    });
+    this.realtimeGateway.emitToAdmin('session:closed', { tableSessionId: id });
+    return session;
   }
 
   async getMembers(

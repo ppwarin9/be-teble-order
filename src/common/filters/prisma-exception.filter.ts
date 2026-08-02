@@ -4,6 +4,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -14,6 +15,8 @@ interface IPrismaError {
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -40,8 +43,14 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           message = 'Bad Request: Foreign key constraint failed';
           break;
         default:
+          // Never forward raw Prisma error text to the client — it can
+          // reveal table/column names and query shape. Log it server-side
+          // and return a generic message instead.
           status = HttpStatus.BAD_REQUEST;
-          message = prismaError.message.replace(/\n/g, '');
+          message = 'Bad Request: The database rejected this operation';
+          this.logger.error(
+            `Unhandled Prisma error [${errorCode}]: ${prismaError.message.replace(/\n/g, ' ')}`,
+          );
           break;
       }
     }

@@ -8,6 +8,13 @@ import { Reflector } from '@nestjs/core';
 import { type JwtPayload } from '@/auth/types/jwt-payload.type';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public.decorator';
 import { ROLES_KEY } from '@/common/decorators/roles.decorator';
+import { RoleCode } from '@/database/generated/prisma/enums';
+
+const ROLE_LEVEL: Record<RoleCode, number> = {
+  STAFF: 1,
+  ADMIN: 2,
+  SUPERADMIN: 3,
+};
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -22,7 +29,7 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+    const requiredRoles = this.reflector.getAllAndOverride<RoleCode[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
@@ -38,7 +45,11 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Access denied: Missing user roles');
     }
 
-    const hasRole = requiredRoles.some((role) => user.role === role);
+    const userLevel = ROLE_LEVEL[user.role] ?? 0;
+    const requiredLevel = Math.min(
+      ...requiredRoles.map((role) => ROLE_LEVEL[role] ?? Infinity),
+    );
+    const hasRole = userLevel >= requiredLevel;
 
     if (!hasRole) {
       throw new ForbiddenException(

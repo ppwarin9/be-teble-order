@@ -43,9 +43,13 @@ export class MenuItemRepository extends MenuItemRepositoryInterface {
     });
   }
 
-  async getAllForCustomer(): Promise<MenuItem[]> {
+  async getAllForCustomer(categoryId?: string): Promise<MenuItem[]> {
     return this.prisma.menuItem.findMany({
-      where: { deletedAt: null, category: { isActive: true } },
+      where: {
+        deletedAt: null,
+        category: { isActive: true },
+        ...(categoryId ? { categoryId } : {}),
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

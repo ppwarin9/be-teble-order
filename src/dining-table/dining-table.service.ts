@@ -13,6 +13,15 @@ export class DiningTableService {
   constructor(private readonly repository: DiningTableRepositoryInterface) {}
 
   async create(dto: CreateDiningTableDto): Promise<DiningTable> {
+    const existingTable = await this.repository.findByTableNumber(
+      dto.tableNumber,
+    );
+    if (existingTable) {
+      throw new ConflictException(
+        `Table number '${dto.tableNumber}' already exists`,
+      );
+    }
+
     const qrToken = crypto.randomUUID();
 
     return this.repository.create({
@@ -31,6 +40,18 @@ export class DiningTableService {
 
   async update(id: string, dto: UpdateDiningTableDto): Promise<DiningTable> {
     await this.findByIdOrThrow(id);
+
+    if (dto.tableNumber) {
+      const existingTable = await this.repository.findByTableNumber(
+        dto.tableNumber,
+      );
+      if (existingTable && existingTable.id !== id) {
+        throw new ConflictException(
+          `Table number '${dto.tableNumber}' already exists`,
+        );
+      }
+    }
+
     return this.repository.update(id, dto);
   }
 

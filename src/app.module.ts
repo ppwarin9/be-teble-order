@@ -22,6 +22,7 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { BillModule } from './bill/bill.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     OrderModule,
     BillModule,
     DashboardModule,
+    RealtimeModule,
   ],
   providers: [
     {

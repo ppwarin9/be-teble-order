@@ -45,7 +45,6 @@ export class AuthService {
       role: staff.role.code,
     };
 
-    console.log('signAccessToken ');
     return this.jwtService.sign(payload);
   }
 }

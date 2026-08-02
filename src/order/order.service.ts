@@ -8,6 +8,7 @@ import {
   OrderRepositoryInterface,
   OrderRoundWithItems,
 } from '@/order/order.repository.interface';
+import { RealtimeGateway } from '@/realtime/realtime.gateway';
 import {
   BadRequestException,
   Injectable,
@@ -22,6 +23,7 @@ export class OrderService {
   constructor(
     private readonly repository: OrderRepositoryInterface,
     private readonly cartService: CartService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async submitCart(
@@ -55,6 +57,13 @@ export class OrderService {
 
     await this.cartService.clearCart(cart.id);
 
+    this.realtimeGateway.emitToTableSession(
+      sessionMember.tableSessionId,
+      'round:submitted',
+      { roundId: round.id },
+    );
+    this.realtimeGateway.emitToAdmin('round:submitted', { roundId: round.id });
+
     return round;
   }
 
@@ -86,13 +95,26 @@ export class OrderService {
       );
     }
 
-    return this.repository.updateStatus(id, {
+    const updated = await this.repository.updateStatus(id, {
       status: nextStatus,
       ...(nextStatus === 'COOKING' && { startedAt: new Date() }),
     });
+
+    const tableSessionId = item.orderRound.tableSessionId;
+    this.realtimeGateway.emitToTableSession(
+      tableSessionId,
+      'order_item:updated',
+      { orderItemId: id, status: nextStatus },
+    );
+    this.realtimeGateway.emitToAdmin('order_item:updated', {
+      orderItemId: id,
+      status: nextStatus,
+    });
+
+    return updated;
   }
 
-  private async findByIdOrThrow(id: string): Promise<OrderItem> {
+  private async findByIdOrThrow(id: string): Promise<OrderItemWithContext> {
     const item = await this.repository.getOrderItemById(id);
     if (!item) {
       throw new NotFoundException('Order item not found');

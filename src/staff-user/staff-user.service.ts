@@ -5,6 +5,7 @@ import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
 import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -56,8 +57,13 @@ export class StaffUserService {
   async updateStaffUser(
     id: string,
     dto: UpdateStaffUserDto,
+    currentUserId: string,
   ): Promise<StaffUser> {
     await this.findByIdOrThrow(id);
+
+    if (id === currentUserId && dto.isActive === false) {
+      throw new ForbiddenException('You cannot deactivate your own account');
+    }
 
     if (dto.roleId) {
       const role = await this.roleService.getById(dto.roleId);
@@ -69,7 +75,11 @@ export class StaffUserService {
     return this.staffUserRepository.update(id, dto);
   }
 
-  async removeStaffUser(id: string): Promise<StaffUser> {
+  async removeStaffUser(id: string, currentUserId: string): Promise<StaffUser> {
+    if (id === currentUserId) {
+      throw new ForbiddenException('You cannot delete your own account');
+    }
+
     await this.findByIdOrThrow(id);
     return this.staffUserRepository.softDelete(id);
   }

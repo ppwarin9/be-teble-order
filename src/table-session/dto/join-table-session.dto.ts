@@ -13,13 +13,15 @@ export class JoinTableSessionDto {
   qrToken: string;
 
   @ApiProperty({
-    description: "The customer's LINE user id",
-    example: 'U4af4980629...',
+    description:
+      'LIFF ID token (JWT) obtained from liff.getIDToken() on the client. ' +
+      'Verified server-side against LINE — this is what authenticates the ' +
+      'customer, so their identity can never be spoofed by the request body.',
+    example: 'eyJhbGciOiJIUzI1NiJ9...',
   })
   @IsString()
   @IsNotEmpty()
-  @Trim()
-  lineUserId: string;
+  idToken: string;
 
   @ApiProperty({
     description: "The customer's LINE display name",

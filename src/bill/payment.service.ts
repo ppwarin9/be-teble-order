@@ -4,6 +4,7 @@ import { BillShareRepositoryInterface } from '@/bill/bill-share.repository.inter
 import { CreatePaymentDto } from '@/bill/dto/create-payment.dto';
 import { Payment } from '@/database/generated/prisma/client';
 import { PaymentRepositoryInterface } from '@/bill/payment.repository.interface';
+import { RealtimeGateway } from '@/realtime/realtime.gateway';
 import {
   ConflictException,
   ForbiddenException,
@@ -17,6 +18,7 @@ export class PaymentService {
     private readonly paymentRepository: PaymentRepositoryInterface,
     private readonly billShareRepository: BillShareRepositoryInterface,
     private readonly billRepository: BillRepositoryInterface,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async createPayment(
@@ -43,11 +45,13 @@ export class PaymentService {
       );
     }
 
-    return this.paymentRepository.create({
+    const payment = await this.paymentRepository.create({
       billShareId,
       method: dto.method,
       amount: share.amountDue,
     });
+    await this.emitForBillShare(billShareId, ['payment:updated']);
+    return payment;
   }
 
   async notifyPayment(
@@ -65,10 +69,12 @@ export class PaymentService {
       throw new ConflictException('Only a pending payment can be notified');
     }
 
-    return this.paymentRepository.updateStatus(paymentId, {
+    const updated = await this.paymentRepository.updateStatus(paymentId, {
       status: 'NOTIFIED',
       notifiedAt: new Date(),
     });
+    await this.emitForBillShare(payment.billShareId, ['payment:updated']);
+    return updated;
   }
 
   async confirmPayment(staffId: string, paymentId: string): Promise<Payment> {
@@ -87,6 +93,10 @@ export class PaymentService {
     });
 
     await this.cascadeAfterConfirm(payment.billShareId);
+    await this.emitForBillShare(payment.billShareId, [
+      'payment:updated',
+      'bill_share:updated',
+    ]);
 
     return updated;
   }
@@ -110,6 +120,10 @@ export class PaymentService {
     });
 
     await this.cascadeAfterConfirm(billShareId);
+    await this.emitForBillShare(billShareId, [
+      'payment:updated',
+      'bill_share:updated',
+    ]);
 
     return payment;
   }
@@ -120,9 +134,30 @@ export class PaymentService {
       throw new NotFoundException('Payment not found');
     }
 
-    return this.paymentRepository.updateStatus(paymentId, {
+    const updated = await this.paymentRepository.updateStatus(paymentId, {
       status: 'FAILED',
     });
+    await this.emitForBillShare(payment.billShareId, ['payment:updated']);
+    return updated;
+  }
+
+  private async emitForBillShare(
+    billShareId: string,
+    events: string[],
+  ): Promise<void> {
+    const share = await this.billShareRepository.getById(billShareId);
+    if (!share) {
+      return;
+    }
+    const bill = await this.billRepository.getById(share.billId);
+    if (!bill) {
+      return;
+    }
+    events.forEach((event) =>
+      this.realtimeGateway.emitToTableSession(bill.tableSessionId, event, {
+        billShareId,
+      }),
+    );
   }
 
   private async cascadeAfterConfirm(billShareId: string): Promise<void> {

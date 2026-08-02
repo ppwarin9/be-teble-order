@@ -7,6 +7,7 @@ import {
 import { AddCartItemDto } from '@/cart/dto/add-cart-item.dto';
 import { UpdateCartItemDto } from '@/cart/dto/update-cart-item.dto';
 import { MenuItemService } from '@/menu-item/menu-item.service';
+import { RealtimeGateway } from '@/realtime/realtime.gateway';
 import {
   ConflictException,
   ForbiddenException,
@@ -19,6 +20,7 @@ export class CartService {
   constructor(
     private readonly repository: CartRepositoryInterface,
     private readonly menuItemService: MenuItemService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async getCurrentCart(
@@ -38,13 +40,19 @@ export class CartService {
 
     const cart = await this.getOrCreateCart(sessionMember.tableSessionId);
 
-    return this.repository.createCartItem({
+    const item = await this.repository.createCartItem({
       cartId: cart.id,
       menuItemId: dto.menuItemId,
       addedBy: sessionMember.id,
       quantity: dto.quantity,
       note: dto.note ?? '',
     });
+    this.realtimeGateway.emitToTableSession(
+      sessionMember.tableSessionId,
+      'cart:updated',
+      { cartItemId: item.id },
+    );
+    return item;
   }
 
   async updateItem(
@@ -54,10 +62,16 @@ export class CartService {
   ): Promise<CartItemWithMenuItem> {
     await this.findCartItemInSessionOrThrow(sessionMember, cartItemId);
 
-    return this.repository.updateCartItem(cartItemId, {
+    const updated = await this.repository.updateCartItem(cartItemId, {
       ...(dto.quantity !== undefined && { quantity: dto.quantity }),
       ...(dto.note !== undefined && { note: dto.note }),
     });
+    this.realtimeGateway.emitToTableSession(
+      sessionMember.tableSessionId,
+      'cart:updated',
+      { cartItemId },
+    );
+    return updated;
   }
 
   async removeItem(
@@ -66,6 +80,11 @@ export class CartService {
   ): Promise<void> {
     await this.findCartItemInSessionOrThrow(sessionMember, cartItemId);
     await this.repository.deleteCartItem(cartItemId);
+    this.realtimeGateway.emitToTableSession(
+      sessionMember.tableSessionId,
+      'cart:updated',
+      { cartItemId },
+    );
   }
 
   async clearCart(cartId: string): Promise<void> {

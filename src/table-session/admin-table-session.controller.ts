@@ -1,3 +1,5 @@
+import { BillResponseDto } from '@/bill/dto/bill-response.dto';
+import { BillService } from '@/bill/bill.service';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { SessionStatus } from '@/database/generated/prisma/enums';
 import { SessionMemberResponseDto } from '@/session-member/dto/session-member-response.dto';
@@ -24,7 +26,10 @@ import {
 @ApiBearerAuth()
 @Controller('admin/table-sessions')
 export class AdminTableSessionController {
-  constructor(private readonly tableSessionService: TableSessionService) {}
+  constructor(
+    private readonly tableSessionService: TableSessionService,
+    private readonly billService: BillService,
+  ) {}
 
   @Get()
   @Roles('ADMIN', 'STAFF')
@@ -69,6 +74,26 @@ export class AdminTableSessionController {
   ): Promise<SessionMemberResponseDto[]> {
     const members = await this.tableSessionService.getMembers(id);
     return members.map((member) => new SessionMemberResponseDto(member));
+  }
+
+  @Get(':id/bill')
+  @Roles('ADMIN', 'STAFF')
+  @ApiOperation({
+    summary: "Get the current table session's most recent bill",
+    description:
+      'Returns the most recently issued bill for this table session (the in-flight OPEN one if a bill has been issued, otherwise the last SETTLED one), with its bill shares.',
+  })
+  @ApiOkResponse({ description: 'Bill found.', type: BillResponseDto })
+  @ApiNotFoundResponse({
+    description:
+      'Table session not found, or no bill has been issued for it yet.',
+  })
+  async getBill(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BillResponseDto> {
+    await this.tableSessionService.getOne(id);
+    const bill = await this.billService.getForAdmin(id);
+    return new BillResponseDto(bill);
   }
 
   @Patch(':id/close')

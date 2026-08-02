@@ -17,14 +17,14 @@ export class MenuCategoryRepository extends MenuCategoryRepositoryInterface {
 
   async getAll(): Promise<MenuCategory[]> {
     return this.prisma.menuCategory.findMany({
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 
   async getAllActive(): Promise<MenuCategory[]> {
     return this.prisma.menuCategory.findMany({
       where: { isActive: true },
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
   }
 

@@ -42,7 +42,7 @@ export abstract class OrderRepositoryInterface {
     statuses?: OrderItemStatus[],
   ): Promise<OrderItemWithContext[]>;
 
-  abstract getOrderItemById(id: string): Promise<OrderItem | null>;
+  abstract getOrderItemById(id: string): Promise<OrderItemWithContext | null>;
 
   abstract updateStatus(
     id: string,

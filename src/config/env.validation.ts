@@ -7,6 +7,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1),
   JWT_EXPIRES_IN: z.string().min(1),
   CORS_ORIGIN: z.string().min(1),
+  LINE_CHANNEL_ID: z.string().min(1),
 });
 
 export function validateEnv(config: Record<string, any>) {

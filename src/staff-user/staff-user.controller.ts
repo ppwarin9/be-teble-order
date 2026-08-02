@@ -1,3 +1,5 @@
+import { CurrentUser } from '@/auth/decorators/current-user.decorator';
+import { type AuthenticatedUser } from '@/auth/types/jwt-payload.type';
 import { Roles } from '@/common/decorators/roles.decorator';
 import {
   Body,
@@ -30,7 +32,7 @@ export class StaffUserController {
   constructor(private readonly staffUserService: StaffUserService) {}
 
   @Post()
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN')
   @ApiOperation({ summary: 'Create a new staff user' })
   @ApiCreatedResponse({
     description: 'Staff user created successfully.',
@@ -46,7 +48,7 @@ export class StaffUserController {
   }
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN')
   @ApiOperation({ summary: 'Get all staff users' })
   @ApiOkResponse({
     description: 'List of staff users.',
@@ -58,7 +60,7 @@ export class StaffUserController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN')
   @ApiOperation({ summary: 'Get a staff user by id' })
   @ApiOkResponse({
     description: 'Staff user found.',
@@ -73,7 +75,7 @@ export class StaffUserController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN')
   @ApiOperation({ summary: 'Update a staff user' })
   @ApiOkResponse({
     description: 'Staff user updated.',
@@ -83,16 +85,18 @@ export class StaffUserController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateStaffUserDto: UpdateStaffUserDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<StaffUserResponseDto> {
     const staff = await this.staffUserService.updateStaffUser(
       id,
       updateStaffUserDto,
+      user.id,
     );
     return new StaffUserResponseDto(staff);
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN')
   @ApiOperation({ summary: 'Soft-delete a staff user' })
   @ApiOkResponse({
     description: 'Staff user soft-deleted.',
@@ -101,8 +105,9 @@ export class StaffUserController {
   @ApiNotFoundResponse({ description: 'Staff user not found.' })
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<StaffUserResponseDto> {
-    const staff = await this.staffUserService.removeStaffUser(id);
+    const staff = await this.staffUserService.removeStaffUser(id, user.id);
     return new StaffUserResponseDto(staff);
   }
 }

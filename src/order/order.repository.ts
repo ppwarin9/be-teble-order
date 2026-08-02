@@ -71,8 +71,15 @@ export class OrderRepository extends OrderRepositoryInterface {
     });
   }
 
-  async getOrderItemById(id: string): Promise<OrderItem | null> {
-    return this.prisma.orderItem.findUnique({ where: { id } });
+  async getOrderItemById(id: string): Promise<OrderItemWithContext | null> {
+    return this.prisma.orderItem.findUnique({
+      where: { id },
+      include: {
+        orderRound: {
+          include: { tableSession: { include: { diningTable: true } } },
+        },
+      },
+    });
   }
 
   async updateStatus(

@@ -1,4 +1,5 @@
 import { BaseResponseDto } from '@/common/dto/base-response.dto';
+import { RoleCode } from '@/database/generated/prisma/enums';
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -9,8 +10,8 @@ export class RoleResponseDto extends BaseResponseDto<RoleResponseDto> {
   declare id: string;
 
   @Expose()
-  @ApiProperty({ example: 'ADMIN' })
-  declare code: string;
+  @ApiProperty({ example: 'ADMIN', enum: RoleCode })
+  declare code: RoleCode;
 
   @Expose()
   @ApiProperty({ example: 'Administrator' })

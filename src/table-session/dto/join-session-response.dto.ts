@@ -17,6 +17,13 @@ export class JoinSessionResponseDto extends BaseResponseDto<JoinSessionResponseD
   declare sessionMemberId: string;
 
   @Expose()
+  @ApiProperty({
+    description: 'Human-readable table number, for display only',
+    example: '12',
+  })
+  declare tableNumber: string;
+
+  @Expose()
   @Type(() => TableSessionResponseDto)
   @ApiProperty({ type: () => TableSessionResponseDto })
   declare tableSession: TableSessionResponseDto;

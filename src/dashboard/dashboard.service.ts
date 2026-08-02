@@ -2,7 +2,10 @@ import {
   ActiveSessionRow,
   DashboardRepositoryInterface,
 } from '@/dashboard/dashboard.repository.interface';
-import { Injectable } from '@nestjs/common';
+import { StoreSettingService } from '@/store-setting/store-setting.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { addDays } from 'date-fns';
+import { format, fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 export type DailySales = {
   date: string;
@@ -13,15 +16,36 @@ export type DailySales = {
 
 @Injectable()
 export class DashboardService {
-  constructor(private readonly repository: DashboardRepositoryInterface) {}
+  constructor(
+    private readonly repository: DashboardRepositoryInterface,
+    private readonly storeSettingService: StoreSettingService,
+  ) {}
 
   async getDailySales(dateInput?: string): Promise<DailySales> {
-    const date = dateInput ? new Date(dateInput) : new Date();
-    const start = new Date(
-      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+    const { timezone } = await this.storeSettingService.get();
+
+    const referenceDate = dateInput ? new Date(dateInput) : new Date();
+    if (Number.isNaN(referenceDate.getTime())) {
+      throw new BadRequestException('Invalid date, expected format YYYY-MM-DD');
+    }
+    const zonedReference = toZonedTime(referenceDate, timezone);
+    // Calendar date (Y/M/D) as observed in the store's timezone, not UTC or server-local.
+    const localDateOnly = new Date(
+      Date.UTC(
+        zonedReference.getUTCFullYear(),
+        zonedReference.getUTCMonth(),
+        zonedReference.getUTCDate(),
+      ),
     );
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + 1);
+    const localDateStr = format(localDateOnly, 'yyyy-MM-dd', {
+      timeZone: 'UTC',
+    });
+    const nextLocalDateStr = format(addDays(localDateOnly, 1), 'yyyy-MM-dd', {
+      timeZone: 'UTC',
+    });
+
+    const start = fromZonedTime(`${localDateStr}T00:00:00`, timezone);
+    const end = fromZonedTime(`${nextLocalDateStr}T00:00:00`, timezone);
 
     const [{ totalSales, billCount }, orderCount] = await Promise.all([
       this.repository.getDailySales(start, end),
@@ -29,7 +53,7 @@ export class DashboardService {
     ]);
 
     return {
-      date: start.toISOString().slice(0, 10),
+      date: localDateStr,
       totalSales,
       billCount,
       orderCount,

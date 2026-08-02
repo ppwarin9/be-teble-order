@@ -41,6 +41,7 @@ export class DiningTableController {
     type: DiningTableResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
+  @ApiConflictResponse({ description: 'Table number already exists.' })
   async create(
     @Body() createDiningTableDto: CreateDiningTableDto,
   ): Promise<DiningTableResponseDto> {
@@ -86,6 +87,7 @@ export class DiningTableController {
   })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
   @ApiNotFoundResponse({ description: 'Dining table not found' })
+  @ApiConflictResponse({ description: 'Table number already exists.' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDiningTableDto: UpdateDiningTableDto,

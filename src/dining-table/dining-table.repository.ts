@@ -27,6 +27,12 @@ export class DiningTableRepository extends DiningTableRepositoryInterface {
     });
   }
 
+  async findByTableNumber(tableNumber: string): Promise<DiningTable | null> {
+    return this.prisma.diningTable.findUnique({
+      where: { tableNumber },
+    });
+  }
+
   async create(data: Prisma.DiningTableCreateInput): Promise<DiningTable> {
     return this.prisma.diningTable.create({
       data,

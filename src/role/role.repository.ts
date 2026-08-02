@@ -9,12 +9,6 @@ export class RoleRepository extends RoleRepositoryInterface {
     super();
   }
 
-  async create(
-    data: Prisma.RoleCreateInput | Prisma.RoleUncheckedCreateInput,
-  ): Promise<Role> {
-    return this.prisma.role.create({ data });
-  }
-
   async getAll(): Promise<Role[]> {
     return this.prisma.role.findMany();
   }
@@ -28,16 +22,5 @@ export class RoleRepository extends RoleRepositoryInterface {
     data: Prisma.RoleUpdateInput | Prisma.RoleUncheckedUpdateInput,
   ): Promise<Role> {
     return this.prisma.role.update({ where: { id }, data });
-  }
-
-  async delete(id: string): Promise<Role> {
-    return this.prisma.role.delete({ where: { id } });
-  }
-
-  async hasStaffUsers(roleId: string): Promise<boolean> {
-    const staffUser = await this.prisma.staffUser.findFirst({
-      where: { roleId },
-    });
-    return !!staffUser;
   }
 }

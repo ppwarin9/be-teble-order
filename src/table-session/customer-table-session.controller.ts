@@ -5,6 +5,7 @@ import { Public } from '@/common/decorators/public.decorator';
 import { SessionMemberResponseDto } from '@/session-member/dto/session-member-response.dto';
 import { JoinSessionResponseDto } from '@/table-session/dto/join-session-response.dto';
 import { JoinTableSessionDto } from '@/table-session/dto/join-table-session.dto';
+import { TableSessionResponseDto } from '@/table-session/dto/table-session-response.dto';
 import { TableSessionService } from '@/table-session/table-session.service';
 import {
   Body,
@@ -15,6 +16,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
@@ -33,6 +35,7 @@ export class CustomerTableSessionController {
 
   @Post('join')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({
     summary: 'Join a table session by scanning the table QR code',
     description:
@@ -52,6 +55,27 @@ export class CustomerTableSessionController {
   ): Promise<JoinSessionResponseDto> {
     const result = await this.tableSessionService.joinByQrToken(dto);
     return new JoinSessionResponseDto(result);
+  }
+
+  @Get('current')
+  @ApiBearerAuth()
+  @UseGuards(SessionTokenGuard)
+  @ApiOperation({
+    summary: "Get the customer's current table session status",
+    description:
+      'Lets the client detect an OPEN vs CLOSED session directly instead of only reactively via a 401 on the next unrelated call.',
+  })
+  @ApiOkResponse({
+    description: 'Current table session.',
+    type: TableSessionResponseDto,
+  })
+  async getCurrent(
+    @CurrentSessionMember() sessionMember: AuthenticatedSessionMember,
+  ): Promise<TableSessionResponseDto> {
+    const tableSession = await this.tableSessionService.getOne(
+      sessionMember.tableSessionId,
+    );
+    return new TableSessionResponseDto(tableSession);
   }
 
   @Get('members')

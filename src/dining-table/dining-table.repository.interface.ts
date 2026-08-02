@@ -7,6 +7,8 @@ export abstract class DiningTableRepositoryInterface {
 
   abstract getByQrToken(qrToken: string): Promise<DiningTable | null>;
 
+  abstract findByTableNumber(tableNumber: string): Promise<DiningTable | null>;
+
   abstract create(data: Prisma.DiningTableCreateInput): Promise<DiningTable>;
 
   abstract update(

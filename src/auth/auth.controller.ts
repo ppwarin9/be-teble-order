@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Post,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -28,6 +29,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Staff login with email and password' })
@@ -41,7 +43,6 @@ export class AuthController {
       loginDto.email,
       loginDto.password,
     );
-    console.log('authContrller');
     const accessToken = this.authService.signAccessToken(staff);
     return new AuthLoginResponseDto({
       accessToken,
