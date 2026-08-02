@@ -5,9 +5,12 @@ import {
   NewBillShareInput,
 } from '@/bill/bill.repository.interface';
 import { GenerateBillDto } from '@/bill/dto/generate-bill.dto';
+import { PaymentRepositoryInterface } from '@/bill/payment.repository.interface';
 import { RealtimeGateway } from '@/realtime/realtime.gateway';
 import { SessionMemberRepositoryInterface } from '@/session-member/session-member.repository.interface';
 import { StoreSettingService } from '@/store-setting/store-setting.service';
+import { AdminBillResponseDto } from '@/table-session/dto/admin-bill-response.dto';
+import { AdminBillShareResponseDto } from '@/table-session/dto/admin-bill-share-response.dto';
 import {
   BadRequestException,
   ConflictException,
@@ -22,6 +25,7 @@ export class BillService {
     private readonly sessionMemberRepository: SessionMemberRepositoryInterface,
     private readonly storeSettingService: StoreSettingService,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly paymentRepository: PaymentRepositoryInterface,
   ) {}
 
   async generateBill(
@@ -99,7 +103,11 @@ export class BillService {
     return this.repository.getAllByTableSessionId(sessionMember.tableSessionId);
   }
 
-  async getForAdmin(tableSessionId: string): Promise<BillWithShares> {
+  /** Enriches the raw bill with what the admin billing UI actually needs per share —
+   *  a human-readable label (the paying member's name) and which method a CONFIRMED
+   *  payment used, if any — neither of which exists on the customer-facing BillWithShares
+   *  shape, so this builds a dedicated response rather than reusing BillResponseDto. */
+  async getForAdmin(tableSessionId: string): Promise<AdminBillResponseDto> {
     const [latest] =
       await this.repository.getAllByTableSessionId(tableSessionId);
     if (!latest) {
@@ -107,7 +115,39 @@ export class BillService {
         'No bill has been issued for this table session yet',
       );
     }
-    return latest;
+
+    const members =
+      await this.sessionMemberRepository.getAllByTableSessionId(
+        tableSessionId,
+      );
+    const memberById = new Map(members.map((m) => [m.id, m]));
+
+    const shares = await Promise.all(
+      latest.billShares.map(async (share) => {
+        const member = memberById.get(share.sessionMemberId);
+        const payments = await this.paymentRepository.getActiveForBillShare(
+          share.id,
+        );
+        const confirmed = payments.find((p) => p.status === 'CONFIRMED');
+        return new AdminBillShareResponseDto({
+          id: share.id,
+          label: member?.customer.displayName ?? 'ผู้เข้าร่วมโต๊ะ',
+          amountDue: share.amountDue,
+          status: share.status,
+          method: confirmed?.method ?? null,
+        });
+      }),
+    );
+
+    return new AdminBillResponseDto({
+      tableSessionId: latest.tableSessionId,
+      subtotal: latest.subtotal,
+      serviceChargeAmount: latest.serviceChargeAmount,
+      vatAmount: latest.vatAmount,
+      grandTotal: latest.grandTotal,
+      status: latest.status,
+      shares,
+    });
   }
 
   private async buildShares(

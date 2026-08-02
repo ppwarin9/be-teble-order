@@ -1,5 +1,5 @@
-import { BillResponseDto } from '@/bill/dto/bill-response.dto';
 import { BillService } from '@/bill/bill.service';
+import { AdminBillResponseDto } from '@/table-session/dto/admin-bill-response.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { SessionStatus } from '@/database/generated/prisma/enums';
 import { SessionMemberResponseDto } from '@/session-member/dto/session-member-response.dto';
@@ -83,17 +83,16 @@ export class AdminTableSessionController {
     description:
       'Returns the most recently issued bill for this table session (the in-flight OPEN one if a bill has been issued, otherwise the last SETTLED one), with its bill shares.',
   })
-  @ApiOkResponse({ description: 'Bill found.', type: BillResponseDto })
+  @ApiOkResponse({ description: 'Bill found.', type: AdminBillResponseDto })
   @ApiNotFoundResponse({
     description:
       'Table session not found, or no bill has been issued for it yet.',
   })
   async getBill(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<BillResponseDto> {
+  ): Promise<AdminBillResponseDto> {
     await this.tableSessionService.getOne(id);
-    const bill = await this.billService.getForAdmin(id);
-    return new BillResponseDto(bill);
+    return this.billService.getForAdmin(id);
   }
 
   @Patch(':id/close')
