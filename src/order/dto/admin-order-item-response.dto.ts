@@ -22,6 +22,10 @@ export class AdminOrderItemResponseDto extends BaseResponseDto<AdminOrderItemRes
   declare roundNumber: number;
 
   @Expose()
+  @ApiProperty({ example: '2026-07-27T10:00:00.000Z' })
+  declare submittedAt: Date;
+
+  @Expose()
   @ApiProperty({ example: 2 })
   declare quantity: number;
 

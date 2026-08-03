@@ -58,6 +58,7 @@ export class AdminOrderController {
           tableSessionId: item.orderRound.tableSessionId,
           tableNumber: item.orderRound.tableSession.diningTable.tableNumber,
           roundNumber: item.orderRound.roundNumber,
+          submittedAt: item.orderRound.submittedAt,
           quantity: item.quantity,
           nameSnapshot: item.nameSnapshot,
           note: item.note,
