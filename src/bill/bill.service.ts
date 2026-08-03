@@ -93,6 +93,10 @@ export class BillService {
     this.realtimeGateway.emitToTableSession(tableSessionId, 'bill:issued', {
       billId: bill.id,
     });
+    this.realtimeGateway.emitToAdmin('bill:issued', {
+      billId: bill.id,
+      tableSessionId,
+    });
 
     return bill;
   }

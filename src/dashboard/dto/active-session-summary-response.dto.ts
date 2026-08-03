@@ -27,4 +27,16 @@ export class ActiveSessionSummaryResponseDto extends BaseResponseDto<ActiveSessi
   @Expose()
   @ApiProperty({ example: 3, description: 'Order items not yet SERVED' })
   declare pendingItemCount: number;
+
+  @Expose()
+  @ApiProperty({ example: 1, description: 'Of pendingItemCount, how many are currently COOKING' })
+  declare cookingItemCount: number;
+
+  @Expose()
+  @ApiProperty({
+    example: 58850,
+    nullable: true,
+    description: 'grandTotal of this session\'s OPEN (unsettled) bill, if one has been issued',
+  })
+  declare openBillAmount: number | null;
 }

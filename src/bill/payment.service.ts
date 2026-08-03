@@ -153,11 +153,15 @@ export class PaymentService {
     if (!bill) {
       return;
     }
-    events.forEach((event) =>
+    events.forEach((event) => {
       this.realtimeGateway.emitToTableSession(bill.tableSessionId, event, {
         billShareId,
-      }),
-    );
+      });
+      this.realtimeGateway.emitToAdmin(event, {
+        billShareId,
+        tableSessionId: bill.tableSessionId,
+      });
+    });
   }
 
   private async cascadeAfterConfirm(billShareId: string): Promise<void> {

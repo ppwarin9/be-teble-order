@@ -5,6 +5,8 @@ export type ActiveSessionRow = {
   openedAt: Date;
   memberCount: number;
   pendingItemCount: number;
+  cookingItemCount: number;
+  openBillAmount: number | null;
 };
 
 export abstract class DashboardRepositoryInterface {

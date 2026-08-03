@@ -47,20 +47,26 @@ export class DashboardRepository extends DashboardRepositoryInterface {
             orderItems: { where: { status: { not: 'SERVED' } } },
           },
         },
+        bills: { where: { status: 'OPEN' }, take: 1 },
       },
       orderBy: { openedAt: 'asc' },
     });
 
-    return sessions.map((session) => ({
-      tableSessionId: session.id,
-      diningTableId: session.diningTableId,
-      tableNumber: session.diningTable.tableNumber,
-      openedAt: session.openedAt,
-      memberCount: session.sessionMembers.length,
-      pendingItemCount: session.orderRounds.reduce(
-        (sum, round) => sum + round.orderItems.length,
-        0,
-      ),
-    }));
+    return sessions.map((session) => {
+      const activeItems = session.orderRounds.flatMap(
+        (round) => round.orderItems,
+      );
+      return {
+        tableSessionId: session.id,
+        diningTableId: session.diningTableId,
+        tableNumber: session.diningTable.tableNumber,
+        openedAt: session.openedAt,
+        memberCount: session.sessionMembers.length,
+        pendingItemCount: activeItems.length,
+        cookingItemCount: activeItems.filter((item) => item.status === 'COOKING')
+          .length,
+        openBillAmount: session.bills[0]?.grandTotal ?? null,
+      };
+    });
   }
 }
