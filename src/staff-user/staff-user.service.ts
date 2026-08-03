@@ -1,14 +1,18 @@
 import { StaffUser } from '@/database/generated/prisma/client';
 import { BcryptService } from '@/infrastructure/hash/bcrypt.service';
 import { RoleService } from '@/role/role.service';
+import { ChangePasswordDto } from '@/staff-user/dto/change-password.dto';
 import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
+import { ResetPasswordDto } from '@/staff-user/dto/reset-password.dto';
 import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { RoleCode } from '@/database/generated/prisma/enums';
 import {
   StaffUserRepositoryInterface,
   StaffUserWithRole,
@@ -39,8 +43,14 @@ export class StaffUserService {
     });
   }
 
-  async getAllStaffUsers(): Promise<StaffUser[]> {
-    return this.staffUserRepository.getAll();
+  // ADMIN only sees STAFF-role accounts (they can only reset those passwords);
+  // SUPERADMIN sees everyone.
+  async getAllStaffUsers(callerRole: RoleCode): Promise<StaffUser[]> {
+    const all = await this.staffUserRepository.getAllWithRole();
+    if (callerRole === 'SUPERADMIN') {
+      return all;
+    }
+    return all.filter((staff) => staff.role.code === 'STAFF');
   }
 
   // Includes passwordHash — for AuthService's login check only, never expose via a controller.
@@ -50,8 +60,12 @@ export class StaffUserService {
     return this.staffUserRepository.getByEmail(email);
   }
 
-  async getStaffUserById(id: string): Promise<StaffUser> {
-    return this.findByIdOrThrow(id);
+  async getStaffUserById(id: string, callerRole: RoleCode): Promise<StaffUser> {
+    const staff = await this.findByIdWithRoleOrThrow(id);
+    if (callerRole !== 'SUPERADMIN' && staff.role.code !== 'STAFF') {
+      throw new ForbiddenException('You can only view STAFF-role accounts');
+    }
+    return staff;
   }
 
   async updateStaffUser(
@@ -84,8 +98,62 @@ export class StaffUserService {
     return this.staffUserRepository.softDelete(id);
   }
 
+  async changeOwnPassword(
+    currentUserId: string,
+    dto: ChangePasswordDto,
+  ): Promise<StaffUser> {
+    const staff = await this.findByIdOrThrow(currentUserId);
+
+    const currentPasswordMatches = await this.bcryptService.compare(
+      dto.currentPassword,
+      staff.passwordHash,
+    );
+    if (!currentPasswordMatches) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const passwordHash = await this.bcryptService.hash(dto.newPassword);
+    return this.staffUserRepository.update(currentUserId, { passwordHash });
+  }
+
+  // ADMIN may only reset STAFF-role passwords; SUPERADMIN may reset anyone's.
+  // Resetting your own password is only available via changeOwnPassword.
+  async resetPassword(
+    targetId: string,
+    dto: ResetPasswordDto,
+    caller: { id: string; role: RoleCode },
+  ): Promise<StaffUser> {
+    if (targetId === caller.id) {
+      throw new ForbiddenException(
+        'Use the change-password endpoint to change your own password',
+      );
+    }
+
+    const target = await this.findByIdWithRoleOrThrow(targetId);
+    if (caller.role !== 'SUPERADMIN' && target.role.code !== 'STAFF') {
+      throw new ForbiddenException(
+        'You can only reset passwords for STAFF-role accounts',
+      );
+    }
+
+    const passwordHash = await this.bcryptService.hash(dto.newPassword);
+    return this.staffUserRepository.update(targetId, { passwordHash });
+  }
+
   private async findByIdOrThrow(id: string): Promise<StaffUser> {
     const staff = await this.staffUserRepository.getById(id);
+
+    if (!staff) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return staff;
+  }
+
+  private async findByIdWithRoleOrThrow(
+    id: string,
+  ): Promise<StaffUserWithRole> {
+    const staff = await this.staffUserRepository.getByIdWithRole(id);
 
     if (!staff) {
       throw new NotFoundException(`User with ID ${id} not found`);

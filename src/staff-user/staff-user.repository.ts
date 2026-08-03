@@ -26,6 +26,13 @@ export class StaffUserRepository extends StaffUserRepositoryInterface {
     });
   }
 
+  async getAllWithRole(): Promise<StaffUserWithRole[]> {
+    return this.prisma.staffUser.findMany({
+      where: { deletedAt: null },
+      include: { role: true },
+    });
+  }
+
   async getByEmail(email: string): Promise<StaffUserWithRole | null> {
     return this.prisma.staffUser.findFirst({
       where: {
@@ -43,6 +50,16 @@ export class StaffUserRepository extends StaffUserRepositoryInterface {
         id,
         deletedAt: null,
       },
+    });
+  }
+
+  async getByIdWithRole(id: string): Promise<StaffUserWithRole | null> {
+    return this.prisma.staffUser.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: { role: true },
     });
   }
 

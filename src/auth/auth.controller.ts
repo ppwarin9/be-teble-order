@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
@@ -22,11 +23,16 @@ import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/auth/decorators/current-user.decorator';
 import { type AuthenticatedUser } from '@/auth/types/jwt-payload.type';
 import { StaffUserResponseDto } from '@/staff-user/dto/staff-user-response.dto';
+import { StaffUserService } from '@/staff-user/staff-user.service';
+import { ChangePasswordDto } from '@/staff-user/dto/change-password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly staffUserService: StaffUserService,
+  ) {}
 
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -56,5 +62,18 @@ export class AuthController {
   @Get('me')
   getCurrentStaff(@CurrentUser() user: AuthenticatedUser): AuthMeResponseDto {
     return new AuthMeResponseDto(user);
+  }
+
+  @Patch('change-password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change your own password' })
+  @ApiOkResponse({ type: StaffUserResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Current password is incorrect.' })
+  async changePassword(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ChangePasswordDto,
+  ): Promise<StaffUserResponseDto> {
+    const staff = await this.staffUserService.changeOwnPassword(user.id, dto);
+    return new StaffUserResponseDto(staff);
   }
 }

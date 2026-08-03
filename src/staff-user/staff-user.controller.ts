@@ -15,12 +15,14 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateStaffUserDto } from '@/staff-user/dto/create-staff-user.dto';
+import { ResetPasswordDto } from '@/staff-user/dto/reset-password.dto';
 import { UpdateStaffUserDto } from '@/staff-user/dto/update-staff-user.dto';
 import { StaffUserResponseDto } from '@/staff-user/dto/staff-user-response.dto';
 import { StaffUserService } from './staff-user.service';
@@ -48,29 +50,39 @@ export class StaffUserController {
   }
 
   @Get()
-  @Roles('SUPERADMIN')
-  @ApiOperation({ summary: 'Get all staff users' })
+  @Roles('ADMIN')
+  @ApiOperation({
+    summary: 'Get all staff users',
+    description:
+      'SUPERADMIN sees every account; ADMIN only sees STAFF-role accounts (the only ones they may reset passwords for).',
+  })
   @ApiOkResponse({
     description: 'List of staff users.',
     type: [StaffUserResponseDto],
   })
-  async getAll(): Promise<StaffUserResponseDto[]> {
-    const staffList = await this.staffUserService.getAllStaffUsers();
+  async getAll(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<StaffUserResponseDto[]> {
+    const staffList = await this.staffUserService.getAllStaffUsers(user.role);
     return staffList.map((staff) => new StaffUserResponseDto(staff));
   }
 
   @Get(':id')
-  @Roles('SUPERADMIN')
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Get a staff user by id' })
   @ApiOkResponse({
     description: 'Staff user found.',
     type: StaffUserResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Staff user not found.' })
+  @ApiForbiddenResponse({
+    description: 'ADMIN callers may only view STAFF-role accounts.',
+  })
   async getOne(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<StaffUserResponseDto> {
-    const staff = await this.staffUserService.getStaffUserById(id);
+    const staff = await this.staffUserService.getStaffUserById(id, user.role);
     return new StaffUserResponseDto(staff);
   }
 
@@ -108,6 +120,31 @@ export class StaffUserController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<StaffUserResponseDto> {
     const staff = await this.staffUserService.removeStaffUser(id, user.id);
+    return new StaffUserResponseDto(staff);
+  }
+
+  @Patch(':id/password')
+  @Roles('ADMIN')
+  @ApiOperation({
+    summary: "Reset another staff user's password",
+    description:
+      'SUPERADMIN may reset anyone; ADMIN may only reset STAFF-role accounts. Use PATCH /auth/change-password to change your own.',
+  })
+  @ApiOkResponse({
+    description: 'Password reset.',
+    type: StaffUserResponseDto,
+  })
+  @ApiNotFoundResponse({ description: 'Staff user not found.' })
+  @ApiForbiddenResponse({
+    description:
+      "Caller lacks permission to reset this account's password, or targeted their own account.",
+  })
+  async resetPassword(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ResetPasswordDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<StaffUserResponseDto> {
+    const staff = await this.staffUserService.resetPassword(id, dto, user);
     return new StaffUserResponseDto(staff);
   }
 }

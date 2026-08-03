@@ -9,9 +9,13 @@ export abstract class StaffUserRepositoryInterface {
 
   abstract getAll(): Promise<StaffUser[]>;
 
+  abstract getAllWithRole(): Promise<StaffUserWithRole[]>;
+
   abstract getByEmail(email: string): Promise<StaffUserWithRole | null>;
 
   abstract getById(id: string): Promise<StaffUser | null>;
+
+  abstract getByIdWithRole(id: string): Promise<StaffUserWithRole | null>;
 
   abstract update(
     id: string,
