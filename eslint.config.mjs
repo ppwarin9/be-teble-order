@@ -32,4 +32,13 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    // jest.fn()-based mocks aren't unbound in any dangerous sense — this rule's default
+    // behavior otherwise flags nearly every `expect(mock.method).toHaveBeenCalledWith(...)`
+    // assertion in a typical Nest testing-module spec file.
+    files: ['**/*.spec.ts', 'test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
 );
