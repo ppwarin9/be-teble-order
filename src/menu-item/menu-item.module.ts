@@ -5,9 +5,10 @@ import { CustomerMenuItemController } from '@/menu-item/customer-menu-item.contr
 import { MenuItemRepository } from '@/menu-item/menu-item.repository';
 import { MenuItemRepositoryInterface } from '@/menu-item/menu-item.repository.interface';
 import { MenuCategoryModule } from '@/menu-category/menu-category.module';
+import { UploadModule } from '@/infrastructure/upload/upload.module';
 
 @Module({
-  imports: [MenuCategoryModule],
+  imports: [MenuCategoryModule, UploadModule],
   controllers: [AdminMenuItemController, CustomerMenuItemController],
   providers: [
     MenuItemService,
