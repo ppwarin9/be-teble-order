@@ -4,6 +4,7 @@ import {
   BillWithShares,
   NewBillShareInput,
 } from '@/bill/bill.repository.interface';
+import { calculateBillTotals } from '@/bill/calculate-bill-totals';
 import { GenerateBillDto } from '@/bill/dto/generate-bill.dto';
 import { PaymentRepositoryInterface } from '@/bill/payment.repository.interface';
 import { RealtimeGateway } from '@/realtime/realtime.gateway';
@@ -56,14 +57,10 @@ export class BillService {
     }
 
     const storeSetting = await this.storeSettingService.get();
-    const serviceChargeAmount = storeSetting.enableServiceCharge
-      ? Math.round(subtotal * storeSetting.serviceChargeRate)
-      : 0;
-    const vatBase = subtotal + serviceChargeAmount;
-    const vatAmount = storeSetting.enableVat
-      ? Math.round(vatBase * storeSetting.vatRate)
-      : 0;
-    const grandTotal = subtotal + serviceChargeAmount + vatAmount;
+    const { serviceChargeAmount, vatAmount, grandTotal } = calculateBillTotals(
+      subtotal,
+      storeSetting,
+    );
 
     const shares = await this.buildShares(
       sessionMember,

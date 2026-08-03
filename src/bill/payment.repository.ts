@@ -19,7 +19,7 @@ export class PaymentRepository extends PaymentRepositoryInterface {
   async getById(id: string): Promise<PaymentWithBillShare | null> {
     return this.prisma.payment.findUnique({
       where: { id },
-      include: { billShare: true },
+      include: { billShare: { include: { bill: true } } },
     });
   }
 

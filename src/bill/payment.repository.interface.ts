@@ -1,6 +1,13 @@
-import { BillShare, Payment, Prisma } from '@/database/generated/prisma/client';
+import {
+  Bill,
+  BillShare,
+  Payment,
+  Prisma,
+} from '@/database/generated/prisma/client';
 
-export type PaymentWithBillShare = Payment & { billShare: BillShare };
+export type PaymentWithBillShare = Payment & {
+  billShare: BillShare & { bill: Bill };
+};
 
 export abstract class PaymentRepositoryInterface {
   abstract create(data: Prisma.PaymentUncheckedCreateInput): Promise<Payment>;

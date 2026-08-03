@@ -1,7 +1,10 @@
 import { BillShare } from '@/database/generated/prisma/client';
 import { BillShareStatus } from '@/database/generated/prisma/enums';
 import { PrismaService } from '@/database/prisma.service';
-import { BillShareRepositoryInterface } from '@/bill/bill-share.repository.interface';
+import {
+  BillShareRepositoryInterface,
+  BillShareWithBill,
+} from '@/bill/bill-share.repository.interface';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -10,8 +13,11 @@ export class BillShareRepository extends BillShareRepositoryInterface {
     super();
   }
 
-  async getById(id: string): Promise<BillShare | null> {
-    return this.prisma.billShare.findUnique({ where: { id } });
+  async getById(id: string): Promise<BillShareWithBill | null> {
+    return this.prisma.billShare.findUnique({
+      where: { id },
+      include: { bill: true },
+    });
   }
 
   async updateStatus(id: string, status: BillShareStatus): Promise<BillShare> {

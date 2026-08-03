@@ -50,7 +50,9 @@ export class PaymentService {
       method: dto.method,
       amount: share.amountDue,
     });
-    await this.emitForBillShare(billShareId, ['payment:updated']);
+    this.emitForBillShare(billShareId, share.bill.tableSessionId, [
+      'payment:updated',
+    ]);
     return payment;
   }
 
@@ -73,7 +75,11 @@ export class PaymentService {
       status: 'NOTIFIED',
       notifiedAt: new Date(),
     });
-    await this.emitForBillShare(payment.billShareId, ['payment:updated']);
+    this.emitForBillShare(
+      payment.billShareId,
+      payment.billShare.bill.tableSessionId,
+      ['payment:updated'],
+    );
     return updated;
   }
 
@@ -93,10 +99,11 @@ export class PaymentService {
     });
 
     await this.cascadeAfterConfirm(payment.billShareId);
-    await this.emitForBillShare(payment.billShareId, [
-      'payment:updated',
-      'bill_share:updated',
-    ]);
+    this.emitForBillShare(
+      payment.billShareId,
+      payment.billShare.bill.tableSessionId,
+      ['payment:updated', 'bill_share:updated'],
+    );
 
     return updated;
   }
@@ -128,7 +135,7 @@ export class PaymentService {
     });
 
     await this.cascadeAfterConfirm(billShareId);
-    await this.emitForBillShare(billShareId, [
+    this.emitForBillShare(billShareId, share.bill.tableSessionId, [
       'payment:updated',
       'bill_share:updated',
     ]);
@@ -145,29 +152,30 @@ export class PaymentService {
     const updated = await this.paymentRepository.updateStatus(paymentId, {
       status: 'FAILED',
     });
-    await this.emitForBillShare(payment.billShareId, ['payment:updated']);
+    this.emitForBillShare(
+      payment.billShareId,
+      payment.billShare.bill.tableSessionId,
+      ['payment:updated'],
+    );
     return updated;
   }
 
-  private async emitForBillShare(
+  // Every caller already has tableSessionId in scope from the query it just ran
+  // (sessionMember.tableSessionId for customer-initiated calls, or the nested
+  // billShare.bill/bill relation already included in this service's other
+  // lookups) — no need for this to re-fetch share+bill itself on every emit.
+  private emitForBillShare(
     billShareId: string,
+    tableSessionId: string,
     events: string[],
-  ): Promise<void> {
-    const share = await this.billShareRepository.getById(billShareId);
-    if (!share) {
-      return;
-    }
-    const bill = await this.billRepository.getById(share.billId);
-    if (!bill) {
-      return;
-    }
+  ): void {
     events.forEach((event) => {
-      this.realtimeGateway.emitToTableSession(bill.tableSessionId, event, {
+      this.realtimeGateway.emitToTableSession(tableSessionId, event, {
         billShareId,
       });
       this.realtimeGateway.emitToAdmin(event, {
         billShareId,
-        tableSessionId: bill.tableSessionId,
+        tableSessionId,
       });
     });
   }
