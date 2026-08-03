@@ -1,5 +1,9 @@
 import { EnvVariable } from '@/config/env.validation';
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'node:stream';
@@ -8,7 +12,9 @@ import { Readable } from 'node:stream';
 export class CloudinaryService {
   private readonly logger = new Logger(CloudinaryService.name);
 
-  constructor(private readonly configService: ConfigService<EnvVariable, true>) {
+  constructor(
+    private readonly configService: ConfigService<EnvVariable, true>,
+  ) {
     cloudinary.config({
       cloud_name: configService.get('CLOUDINARY_CLOUD_NAME', { infer: true }),
       api_key: configService.get('CLOUDINARY_API_KEY', { infer: true }),

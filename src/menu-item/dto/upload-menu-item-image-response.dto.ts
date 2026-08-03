@@ -6,7 +6,8 @@ import { Exclude, Expose } from 'class-transformer';
 export class UploadMenuItemImageResponseDto extends BaseResponseDto<UploadMenuItemImageResponseDto> {
   @Expose()
   @ApiProperty({
-    example: 'https://res.cloudinary.com/demo/image/upload/v1/table-order/menu-items/abc123.jpg',
+    example:
+      'https://res.cloudinary.com/demo/image/upload/v1/table-order/menu-items/abc123.jpg',
   })
   declare imageUrl: string;
 }

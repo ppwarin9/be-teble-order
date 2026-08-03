@@ -7,13 +7,18 @@ import {
 } from '@/database/generated/prisma/client';
 import { OrderItemStatus } from '@/database/generated/prisma/enums';
 
-export type OrderRoundWithItems = OrderRound & { orderItems: OrderItem[] };
+type MenuItemImage = { menuItem: { imageUrl: string | null } };
 
-export type OrderItemWithContext = OrderItem & {
-  orderRound: OrderRound & {
-    tableSession: TableSession & { diningTable: DiningTable };
-  };
+export type OrderRoundWithItems = OrderRound & {
+  orderItems: (OrderItem & MenuItemImage)[];
 };
+
+export type OrderItemWithContext = OrderItem &
+  MenuItemImage & {
+    orderRound: OrderRound & {
+      tableSession: TableSession & { diningTable: DiningTable };
+    };
+  };
 
 export type NewOrderItemInput = {
   menuItemId: string;

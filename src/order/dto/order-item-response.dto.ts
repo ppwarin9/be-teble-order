@@ -1,7 +1,7 @@
 import { BaseResponseDto } from '@/common/dto/base-response.dto';
 import { OrderItemStatus } from '@/database/generated/prisma/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
 
 @Exclude()
 export class OrderItemResponseDto extends BaseResponseDto<OrderItemResponseDto> {
@@ -48,4 +48,12 @@ export class OrderItemResponseDto extends BaseResponseDto<OrderItemResponseDto> 
   @Expose()
   @ApiProperty({ example: 15 })
   declare estimatedMinutes: number;
+
+  @Expose()
+  @Transform(
+    ({ obj }: { obj: { menuItem?: { imageUrl: string | null } } }) =>
+      obj.menuItem?.imageUrl ?? null,
+  )
+  @ApiProperty({ example: null, required: false, nullable: true })
+  declare imageUrl?: string | null;
 }

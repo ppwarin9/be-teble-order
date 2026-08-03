@@ -65,6 +65,7 @@ export class AdminOrderController {
           status: item.status,
           startedAt: item.startedAt,
           estimatedMinutes: item.estimatedMinutes,
+          imageUrl: item.menuItem.imageUrl,
         }),
     );
   }

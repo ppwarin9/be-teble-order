@@ -48,4 +48,8 @@ export class AdminOrderItemResponseDto extends BaseResponseDto<AdminOrderItemRes
   @Expose()
   @ApiProperty({ example: 15 })
   declare estimatedMinutes: number;
+
+  @Expose()
+  @ApiProperty({ example: null, required: false, nullable: true })
+  declare imageUrl: string | null;
 }

@@ -121,9 +121,7 @@ export class BillService {
     }
 
     const members =
-      await this.sessionMemberRepository.getAllByTableSessionId(
-        tableSessionId,
-      );
+      await this.sessionMemberRepository.getAllByTableSessionId(tableSessionId);
     const memberById = new Map(members.map((m) => [m.id, m]));
 
     const shares = await Promise.all(

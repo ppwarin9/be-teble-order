@@ -51,7 +51,10 @@ export class AdminMenuItemController {
   @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    schema: { type: 'object', properties: { image: { type: 'string', format: 'binary' } } },
+    schema: {
+      type: 'object',
+      properties: { image: { type: 'string', format: 'binary' } },
+    },
   })
   @ApiOperation({
     summary: 'Upload a menu item image to Cloudinary',
@@ -62,7 +65,9 @@ export class AdminMenuItemController {
     description: 'Image uploaded.',
     type: UploadMenuItemImageResponseDto,
   })
-  @ApiBadRequestResponse({ description: 'Missing file, wrong type, or too large.' })
+  @ApiBadRequestResponse({
+    description: 'Missing file, wrong type, or too large.',
+  })
   async uploadImage(
     @UploadedFile(
       new ParseFilePipeBuilder()

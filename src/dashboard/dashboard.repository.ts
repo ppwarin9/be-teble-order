@@ -63,8 +63,9 @@ export class DashboardRepository extends DashboardRepositoryInterface {
         openedAt: session.openedAt,
         memberCount: session.sessionMembers.length,
         pendingItemCount: activeItems.length,
-        cookingItemCount: activeItems.filter((item) => item.status === 'COOKING')
-          .length,
+        cookingItemCount: activeItems.filter(
+          (item) => item.status === 'COOKING',
+        ).length,
         openBillAmount: session.bills[0]?.grandTotal ?? null,
       };
     });

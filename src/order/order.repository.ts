@@ -41,6 +41,7 @@ export class OrderRepository extends OrderRepositoryInterface {
 
       const orderItems = await tx.orderItem.findMany({
         where: { orderRoundId: round.id },
+        include: { menuItem: { select: { imageUrl: true } } },
       });
 
       return { ...round, orderItems };
@@ -52,7 +53,9 @@ export class OrderRepository extends OrderRepositoryInterface {
   ): Promise<OrderRoundWithItems[]> {
     return this.prisma.orderRound.findMany({
       where: { tableSessionId },
-      include: { orderItems: true },
+      include: {
+        orderItems: { include: { menuItem: { select: { imageUrl: true } } } },
+      },
       orderBy: { roundNumber: 'asc' },
     });
   }
@@ -66,6 +69,7 @@ export class OrderRepository extends OrderRepositoryInterface {
         orderRound: {
           include: { tableSession: { include: { diningTable: true } } },
         },
+        menuItem: { select: { imageUrl: true } },
       },
       orderBy: { orderRound: { submittedAt: 'asc' } },
     });
@@ -78,6 +82,7 @@ export class OrderRepository extends OrderRepositoryInterface {
         orderRound: {
           include: { tableSession: { include: { diningTable: true } } },
         },
+        menuItem: { select: { imageUrl: true } },
       },
     });
   }

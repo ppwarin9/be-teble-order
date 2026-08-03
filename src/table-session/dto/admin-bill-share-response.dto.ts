@@ -1,5 +1,8 @@
 import { BaseResponseDto } from '@/common/dto/base-response.dto';
-import { BillShareStatus, PaymentMethodCode } from '@/database/generated/prisma/enums';
+import {
+  BillShareStatus,
+  PaymentMethodCode,
+} from '@/database/generated/prisma/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
