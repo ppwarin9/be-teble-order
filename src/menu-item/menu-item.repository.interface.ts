@@ -15,8 +15,6 @@ export abstract class MenuItemRepositoryInterface {
 
   abstract getById(id: string): Promise<MenuItemWithCategory | null>;
 
-  abstract getByCategoryId(categoryId: string): Promise<MenuItem[]>;
-
   abstract getAllForCustomer(categoryId?: string): Promise<MenuItem[]>;
 
   abstract getByIdForCustomer(id: string): Promise<MenuItemWithCategory | null>;

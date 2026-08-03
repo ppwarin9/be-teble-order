@@ -148,43 +148,6 @@ model MenuItem {
   @@map("menu_item")
 }
 
-// model ModifierGroup {
-//   id         String  @id @default(uuid())
-//   name       String
-//   isRequired Boolean @map("is_required")
-//   maxSelect  Int     @map("max_select") // 1 = radio, >1 = checkbox
-
-//   options   ModifierOption[]
-//   menuItems MenuItemModifierGroup[]
-
-//   @@map("modifier_group")
-// }
-
-// model ModifierOption {
-//   id              String        @id @default(uuid())
-//   modifierGroupId String        @map("modifier_group_id")
-//   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
-//   name            String
-//   priceDelta      Int           @default(0) @map("price_delta")
-//   isActive        Boolean       @default(true) @map("is_active")
-
-//   cartItemModifiers  CartItemModifier[]
-//   orderItemModifiers OrderItemModifier[]
-
-//   @@index([modifierGroupId])
-//   @@map("modifier_option")
-// }
-
-// model MenuItemModifierGroup {
-//   menuItemId      String        @map("menu_item_id")
-//   modifierGroupId String        @map("modifier_group_id")
-//   menuItem        MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-//   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
-
-//   @@id([menuItemId, modifierGroupId])
-//   @@map("menu_item_modifier_group")
-// }
-
 model Customer {
   id             String          @id @default(uuid())
   lineUserId     String          @unique @map("line_user_id")
@@ -256,16 +219,6 @@ model CartItem {
   @@map("cart_item")
 }
 
-// model CartItemModifier {
-//   cartItemId       String @map("cart_item_id")
-//   modifierOptionId String @map("modifier_option_id")
-//   cartItem         CartItem       @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
-//   modifierOption   ModifierOption @relation(fields: [modifierOptionId], references: [id], onDelete: Restrict)
-
-//   @@id([cartItemId, modifierOptionId])
-//   @@map("cart_item_modifier")
-// }
-
 model OrderRound {
   id             String           @id @default(uuid())
   tableSessionId String           @map("table_session_id")
@@ -298,19 +251,6 @@ model OrderItem {
   @@index([orderRoundId])
   @@map("order_item")
 }
-
-// model OrderItemModifier {
-//   id                   String   @id @default(uuid())
-//   orderItemId          String   @map("order_item_id")
-//   orderItem            OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-//   modifierOptionId     String   @map("modifier_option_id")
-//   modifierOption       ModifierOption @relation(fields: [modifierOptionId], references: [id], onDelete: Restrict)
-//   nameSnapshot         String   @map("name_snapshot")
-//   priceDeltaSnapshot   Int      @map("price_delta_snapshot")
-
-//   @@index([orderItemId])
-//   @@map("order_item_modifier")
-// }
 
 model Bill {
   id                        String         @id @default(uuid())

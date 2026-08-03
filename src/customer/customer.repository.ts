@@ -22,8 +22,4 @@ export class CustomerRepository extends CustomerRepositoryInterface {
       },
     });
   }
-
-  async getById(id: string): Promise<Customer | null> {
-    return this.prisma.customer.findUnique({ where: { id } });
-  }
 }

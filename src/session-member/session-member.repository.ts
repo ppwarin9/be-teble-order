@@ -31,15 +31,6 @@ export class SessionMemberRepository extends SessionMemberRepositoryInterface {
     });
   }
 
-  async findByTableSessionAndCustomer(
-    tableSessionId: string,
-    customerId: string,
-  ): Promise<SessionMember | null> {
-    return this.prisma.sessionMember.findUnique({
-      where: { tableSessionId_customerId: { tableSessionId, customerId } },
-    });
-  }
-
   async create(
     data: Prisma.SessionMemberUncheckedCreateInput,
   ): Promise<SessionMember> {

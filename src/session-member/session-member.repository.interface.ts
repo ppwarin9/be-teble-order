@@ -22,11 +22,6 @@ export abstract class SessionMemberRepositoryInterface {
     customerId: string,
   ): Promise<SessionMemberWithTableSession | null>;
 
-  abstract findByTableSessionAndCustomer(
-    tableSessionId: string,
-    customerId: string,
-  ): Promise<SessionMember | null>;
-
   abstract create(
     data: Prisma.SessionMemberUncheckedCreateInput,
   ): Promise<SessionMember>;

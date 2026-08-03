@@ -8,6 +8,4 @@ export type UpsertCustomerData = {
 
 export abstract class CustomerRepositoryInterface {
   abstract upsertByLineUserId(data: UpsertCustomerData): Promise<Customer>;
-
-  abstract getById(id: string): Promise<Customer | null>;
 }
