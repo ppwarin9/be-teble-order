@@ -9,6 +9,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Query,
@@ -40,7 +41,8 @@ export class AdminTableSessionController {
     type: [TableSessionResponseDto],
   })
   async getAll(
-    @Query('status') status?: SessionStatus,
+    @Query('status', new ParseEnumPipe(SessionStatus, { optional: true }))
+    status?: SessionStatus,
   ): Promise<TableSessionResponseDto[]> {
     const sessions = await this.tableSessionService.getAll(status);
     return sessions.map((session) => new TableSessionResponseDto(session));

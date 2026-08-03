@@ -56,7 +56,6 @@ export class BillService {
     }
 
     const storeSetting = await this.storeSettingService.get();
-    const discountAmount = 0;
     const serviceChargeAmount = storeSetting.enableServiceCharge
       ? Math.round(subtotal * storeSetting.serviceChargeRate)
       : 0;
@@ -64,8 +63,7 @@ export class BillService {
     const vatAmount = storeSetting.enableVat
       ? Math.round(vatBase * storeSetting.vatRate)
       : 0;
-    const grandTotal =
-      subtotal - discountAmount + serviceChargeAmount + vatAmount;
+    const grandTotal = subtotal + serviceChargeAmount + vatAmount;
 
     const shares = await this.buildShares(
       sessionMember,
@@ -79,7 +77,6 @@ export class BillService {
         tableSessionId,
         splitMethod: dto.splitMethod,
         subtotal,
-        discountAmount,
         serviceChargeRateSnapshot: storeSetting.serviceChargeRate,
         serviceChargeAmount,
         vatRateSnapShot: storeSetting.vatRate,

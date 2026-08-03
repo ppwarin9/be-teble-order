@@ -1,6 +1,6 @@
 import { AuthenticatedSessionMember } from '@/auth/types/session.type';
 import { CartService } from '@/cart/cart.service';
-import { OrderItem } from '@/database/generated/prisma/client';
+import { OrderItem, Prisma } from '@/database/generated/prisma/client';
 import { OrderItemStatus } from '@/database/generated/prisma/enums';
 import {
   NewOrderItemInput,
@@ -17,6 +17,7 @@ import {
 
 const STATUS_ORDER: OrderItemStatus[] = ['PENDING', 'COOKING', 'SERVED'];
 const DEFAULT_QUEUE_STATUSES: OrderItemStatus[] = ['PENDING', 'COOKING'];
+const MAX_ROUND_NUMBER_RETRIES = 3;
 
 @Injectable()
 export class OrderService {
@@ -35,10 +36,6 @@ export class OrderService {
       throw new BadRequestException('Cannot submit an empty cart');
     }
 
-    const roundNumber = await this.repository.getNextRoundNumber(
-      sessionMember.tableSessionId,
-    );
-
     const items: NewOrderItemInput[] = cart.cartItems.map((cartItem) => ({
       menuItemId: cartItem.menuItemId,
       addedBy: cartItem.addedBy,
@@ -49,9 +46,8 @@ export class OrderService {
       estimatedMinutes: cartItem.menuItem.estimatedCookingMinutes,
     }));
 
-    const round = await this.repository.createRoundWithItems(
+    const round = await this.createRoundWithRetry(
       sessionMember.tableSessionId,
-      roundNumber,
       items,
     );
 
@@ -120,5 +116,35 @@ export class OrderService {
       throw new NotFoundException('Order item not found');
     }
     return item;
+  }
+
+  // getNextRoundNumber + createRoundWithItems isn't atomic — two concurrent
+  // submits for the same table can both read the same count before either
+  // writes. The insert itself is protected by a unique constraint, so on that
+  // race lose (P2002) we just re-read the count and try again, mirroring
+  // TableSessionRepository.findOrCreateOpenSession's identical race handling.
+  private async createRoundWithRetry(
+    tableSessionId: string,
+    items: NewOrderItemInput[],
+    attempt = 0,
+  ): Promise<OrderRoundWithItems> {
+    const roundNumber =
+      await this.repository.getNextRoundNumber(tableSessionId);
+    try {
+      return await this.repository.createRoundWithItems(
+        tableSessionId,
+        roundNumber,
+        items,
+      );
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002' &&
+        attempt < MAX_ROUND_NUMBER_RETRIES
+      ) {
+        return this.createRoundWithRetry(tableSessionId, items, attempt + 1);
+      }
+      throw error;
+    }
   }
 }

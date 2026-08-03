@@ -11,7 +11,6 @@ export type NewBillInput = {
   tableSessionId: string;
   splitMethod: Prisma.BillCreateInput['splitMethod'];
   subtotal: number;
-  discountAmount: number;
   serviceChargeRateSnapshot: number;
   serviceChargeAmount: number;
   vatRateSnapShot: number;

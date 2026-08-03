@@ -9,6 +9,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Query,
@@ -46,7 +47,8 @@ export class AdminOrderController {
     type: [AdminOrderItemResponseDto],
   })
   async getQueue(
-    @Query('status') status?: OrderItemStatus,
+    @Query('status', new ParseEnumPipe(OrderItemStatus, { optional: true }))
+    status?: OrderItemStatus,
   ): Promise<AdminOrderItemResponseDto[]> {
     const items = await this.orderService.getQueue(
       status ? [status] : undefined,

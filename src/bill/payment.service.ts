@@ -110,6 +110,14 @@ export class PaymentService {
       throw new ConflictException('This bill share has already been paid');
     }
 
+    const activePayments =
+      await this.paymentRepository.getActiveForBillShare(billShareId);
+    if (activePayments.length > 0) {
+      throw new ConflictException(
+        'A payment for this bill share is already in progress',
+      );
+    }
+
     const payment = await this.paymentRepository.create({
       billShareId,
       method: 'CASH',

@@ -13,7 +13,7 @@ interface IPrismaError {
   message: string;
 }
 
-@Catch(Prisma.PrismaClientKnownRequestError)
+@Catch(Prisma.PrismaClientKnownRequestError, Prisma.PrismaClientValidationError)
 export class PrismaExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(PrismaExceptionFilter.name);
 
@@ -53,6 +53,15 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           );
           break;
       }
+    } else if (exception instanceof Prisma.PrismaClientValidationError) {
+      // Reached by, e.g., an invalid enum value passed into a `where` filter —
+      // malformed client input, not a server fault, so this is a 400 not a 500.
+      status = HttpStatus.BAD_REQUEST;
+      message = 'Bad Request: Invalid query input';
+      errorCode = 'ValidationError';
+      this.logger.error(
+        `Prisma validation error: ${exception.message.replace(/\n/g, ' ')}`,
+      );
     }
 
     response.status(status).json({

@@ -319,7 +319,6 @@ model Bill {
   status                    BillStatus     @default(OPEN)
   splitMethod               SplitMethod    @map("split_method")
   subtotal                  Int
-  discountAmount            Int            @map("discount_amount")
   serviceChargeRateSnapshot Float          @map("service_charge_rete_snapshot")
   serviceChargeAmount       Int            @map("service_charge_amount")
   vatRateSnapShot           Float          @map("vat_rate_snapshot")

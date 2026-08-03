@@ -27,10 +27,6 @@ export class BillResponseDto extends BaseResponseDto<BillResponseDto> {
   declare subtotal: number;
 
   @Expose()
-  @ApiProperty({ example: 0 })
-  declare discountAmount: number;
-
-  @Expose()
   @ApiProperty({ example: 0.1 })
   declare serviceChargeRateSnapshot: number;
 
