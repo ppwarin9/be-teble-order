@@ -35,4 +35,22 @@ export class AdminBillShareResponseDto extends BaseResponseDto<AdminBillShareRes
     nullable: true,
   })
   declare method: PaymentMethodCode | null;
+
+  @Expose()
+  @ApiProperty({
+    description:
+      'ID of a PENDING/NOTIFIED payment awaiting staff action, if any — pass this to ' +
+      'PATCH /admin/payments/:id/confirm or /fail. Null if the customer never started a ' +
+      'payment for this share (use the cash endpoint directly in that case).',
+    nullable: true,
+  })
+  declare pendingPaymentId: string | null;
+
+  @Expose()
+  @ApiProperty({
+    description: "The pending payment's method, if any.",
+    enum: ['PROMPTPAY', 'CASH'],
+    nullable: true,
+  })
+  declare pendingPaymentMethod: PaymentMethodCode | null;
 }

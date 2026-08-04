@@ -125,12 +125,17 @@ export class BillService {
           share.id,
         );
         const confirmed = payments.find((p) => p.status === 'CONFIRMED');
+        const pending = payments.find(
+          (p) => p.status === 'PENDING' || p.status === 'NOTIFIED',
+        );
         return new AdminBillShareResponseDto({
           id: share.id,
           label: member?.customer.displayName ?? 'ผู้เข้าร่วมโต๊ะ',
           amountDue: share.amountDue,
           status: share.status,
           method: confirmed?.method ?? null,
+          pendingPaymentId: pending?.id ?? null,
+          pendingPaymentMethod: pending?.method ?? null,
         });
       }),
     );

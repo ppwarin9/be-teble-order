@@ -253,22 +253,22 @@ model OrderItem {
 }
 
 model Bill {
-  id                        String         @id @default(uuid())
-  tableSessionId            String         @map("table_session_id")
-  tableSession              TableSession   @relation(fields: [tableSessionId], references: [id], onDelete: Restrict)
-  status                    BillStatus     @default(OPEN)
-  splitMethod               SplitMethod    @map("split_method")
+  id                        String       @id @default(uuid())
+  tableSessionId            String       @map("table_session_id")
+  tableSession              TableSession @relation(fields: [tableSessionId], references: [id], onDelete: Restrict)
+  status                    BillStatus   @default(OPEN)
+  splitMethod               SplitMethod  @map("split_method")
   subtotal                  Int
-  serviceChargeRateSnapshot Float          @map("service_charge_rete_snapshot")
-  serviceChargeAmount       Int            @map("service_charge_amount")
-  vatRateSnapShot           Float          @map("vat_rate_snapshot")
-  vatAmount                 Int            @map("vat_amount")
-  grandTotal                Int            @map("grand_total")
-  currencySnapShot          String         @default("THB ") @map("currency_snapshot")
-  issuedBy                  String?        @map("issued_by")
-  issuer                    StaffUser?     @relation("BillIssuedBy", fields: [issuedBy], references: [id], onDelete: SetNull)
-  issuedAt                  DateTime       @default(now()) @map("issued_at")
-  settledAt                 DateTime?      @map("settled_at")
+  serviceChargeRateSnapshot Float        @map("service_charge_rete_snapshot")
+  serviceChargeAmount       Int          @map("service_charge_amount")
+  vatRateSnapShot           Float        @map("vat_rate_snapshot")
+  vatAmount                 Int          @map("vat_amount")
+  grandTotal                Int          @map("grand_total")
+  currencySnapShot          String       @default("THB ") @map("currency_snapshot")
+  issuedBy                  String?      @map("issued_by")
+  issuer                    StaffUser?   @relation("BillIssuedBy", fields: [issuedBy], references: [id], onDelete: SetNull)
+  issuedAt                  DateTime     @default(now()) @map("issued_at")
+  settledAt                 DateTime?    @map("settled_at")
   billShares                BillShare[]
 
   @@index([tableSessionId, status])
