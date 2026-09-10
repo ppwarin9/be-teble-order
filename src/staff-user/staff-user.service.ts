@@ -150,6 +150,15 @@ export class StaffUserService {
     return staff;
   }
 
+  // Used by AuthService to resolve who a refresh token belongs to. Unlike
+  // getStaffUserById(), this has no RBAC check (there's no caller role yet at
+  // that point) but does require isActive so a deactivated staff account
+  // can't mint fresh access tokens off an old refresh token.
+  async getActiveByIdWithRole(id: string): Promise<StaffUserWithRole | null> {
+    const staff = await this.staffUserRepository.getByIdWithRole(id);
+    return staff && staff.isActive ? staff : null;
+  }
+
   private async findByIdWithRoleOrThrow(
     id: string,
   ): Promise<StaffUserWithRole> {

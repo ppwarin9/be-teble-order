@@ -14,6 +14,17 @@ export class AuthLoginResponseDto extends BaseResponseDto<AuthLoginResponseDto> 
   declare accessToken: string;
 
   @Expose()
+  @ApiProperty({
+    description:
+      'Single-use token to exchange for a new access/refresh pair via POST /auth/refresh.',
+  })
+  declare refreshToken: string;
+
+  @Expose()
+  @ApiProperty({ description: 'Access token lifetime in seconds.' })
+  declare expiresIn: number;
+
+  @Expose()
   @Type(() => StaffUserResponseDto)
   @ApiProperty({ type: StaffUserResponseDto })
   declare user: StaffUserResponseDto;

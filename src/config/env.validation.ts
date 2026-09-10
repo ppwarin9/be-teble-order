@@ -6,6 +6,7 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   JWT_SECRET: z.string().min(1),
   JWT_EXPIRES_IN: z.string().min(1),
+  JWT_REFRESH_EXPIRES_IN_DAYS: z.coerce.number().int().positive(),
   CORS_ORIGIN: z.string().min(1),
   LINE_CHANNEL_ID: z.string().min(1),
   CLOUDINARY_CLOUD_NAME: z.string().min(1),

@@ -17,7 +17,9 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from '@/auth/dto/login.dto';
+import { RefreshTokenDto } from '@/auth/dto/refresh-token.dto';
 import { AuthLoginResponseDto } from '@/auth/dto/auth-login-response.dto';
+import { AuthRefreshResponseDto } from '@/auth/dto/auth-refresh-response.dto';
 import { AuthMeResponseDto } from '@/auth/dto/auth-me-response.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/auth/decorators/current-user.decorator';
@@ -49,11 +51,35 @@ export class AuthController {
       loginDto.email,
       loginDto.password,
     );
-    const accessToken = this.authService.signAccessToken(staff);
+    const tokens = await this.authService.issueTokenPair(staff);
     return new AuthLoginResponseDto({
-      accessToken,
+      ...tokens,
       user: new StaffUserResponseDto(staff),
     });
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Exchange a refresh token for a new access/refresh token pair',
+  })
+  @ApiOkResponse({
+    description: 'The refresh token was valid; here is a new pair.',
+    type: AuthRefreshResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired refresh token.' })
+  async refresh(@Body() dto: RefreshTokenDto): Promise<AuthRefreshResponseDto> {
+    const tokens = await this.authService.refreshTokens(dto.refreshToken);
+    return new AuthRefreshResponseDto(tokens);
+  }
+
+  @Public()
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Revoke a refresh token' })
+  async logout(@Body() dto: RefreshTokenDto): Promise<void> {
+    await this.authService.logout(dto.refreshToken);
   }
 
   @ApiOperation({ summary: 'Get current logged-in staff profile' })

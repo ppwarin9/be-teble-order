@@ -93,12 +93,26 @@ model StaffUser {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  createdMenuItems  MenuItem[] @relation("MenuItemCreatedBy")
-  issuedBills       Bill[]     @relation("BillIssuedBy")
-  confirmedPayments Payment[]  @relation("PaymentConfirmedBy")
-  markedPayments    Payment[]  @relation("PaymentMarkedBy")
+  createdMenuItems  MenuItem[]     @relation("MenuItemCreatedBy")
+  issuedBills       Bill[]         @relation("BillIssuedBy")
+  confirmedPayments Payment[]      @relation("PaymentConfirmedBy")
+  markedPayments    Payment[]      @relation("PaymentMarkedBy")
+  refreshTokens     RefreshToken[]
 
   @@map("staff_user")
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  staffUserId String    @map("staff_user_id")
+  staffUser   StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique @map("token_hash")
+  expiresAt   DateTime  @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([staffUserId])
+  @@map("refresh_token")
 }
 
 model DiningTable {
